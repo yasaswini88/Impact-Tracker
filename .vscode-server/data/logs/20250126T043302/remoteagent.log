@@ -1,0 +1,19 @@
+2025-01-26 04:33:02.238 [info] 
+
+
+
+
+2025-01-26 04:33:02.252 [info] Extension host agent started.
+2025-01-26 04:33:02.331 [info] [<unknown>][e97bdd5d][ExtensionHostConnection] New connection established.
+2025-01-26 04:33:02.362 [info] [<unknown>][aab0e5e1][ManagementConnection] New connection established.
+2025-01-26 04:33:02.435 [info] [<unknown>][e97bdd5d][ExtensionHostConnection] <42539> Launched Extension Host Process.
+2025-01-26 04:38:02.255 [info] New EH opened, aborting shutdown
+2025-01-26 05:16:09.437 [info] [<unknown>][aab0e5e1][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+2025-01-26 05:16:32.105 [info] [<unknown>][aab0e5e1][ManagementConnection] Another client has connected, will shorten the wait for reconnection 5m before disposing...
+2025-01-26 05:16:32.105 [info] [<unknown>][aab0e5e1][ManagementConnection] The client has reconnected.
+2025-01-26 05:21:32.394 [info] [<unknown>][e97bdd5d][ExtensionHostConnection] <42539> Extension Host Process exited with code: 0, signal: null.
+2025-01-26 05:21:32.396 [info] Last EH closed, waiting before shutting down
+2025-01-26 05:21:32.398 [error] Error: Unexpected SIGPIPE
+    at process.<anonymous> (file:///home/ec2-user/.vscode-server/cli/servers/Stable-cd4ee3b1c348a13bafd8f9ad8060705f6d4b9cba/server/out/server-main.js:184:1060)
+    at process.emit (node:events:530:35)
+2025-01-26 05:26:32.397 [info] Last EH closed, shutting down

@@ -1,0 +1,27 @@
+2025-01-26 22:27:34.115 [info] 
+
+
+
+
+2025-01-26 22:27:34.129 [info] Extension host agent started.
+2025-01-26 22:27:34.200 [info] [<unknown>][a93d7631][ManagementConnection] New connection established.
+2025-01-26 22:27:34.219 [info] [<unknown>][9624d698][ExtensionHostConnection] New connection established.
+2025-01-26 22:27:34.307 [info] [<unknown>][9624d698][ExtensionHostConnection] <23488> Launched Extension Host Process.
+2025-01-26 22:31:16.335 [info] [<unknown>][a93d7631][ManagementConnection] The client has reconnected.
+2025-01-26 22:31:50.377 [info] [<unknown>][9624d698][ExtensionHostConnection] The client has reconnected.
+2025-01-26 22:32:34.130 [info] New EH opened, aborting shutdown
+2025-01-27 00:39:52.386 [info] [<unknown>][a93d7631][ManagementConnection] The client has reconnected.
+2025-01-27 00:39:52.392 [error] Error: Unexpected SIGPIPE
+    at process.<anonymous> (file:///home/ec2-user/.vscode-server/cli/servers/Stable-cd4ee3b1c348a13bafd8f9ad8060705f6d4b9cba/server/out/server-main.js:184:1060)
+    at process.emit (node:events:530:35)
+2025-01-27 00:39:52.409 [info] [<unknown>][9624d698][ExtensionHostConnection] The client has reconnected.
+2025-01-27 00:45:20.569 [info] [<unknown>][a93d7631][ManagementConnection] The client has reconnected.
+2025-01-27 00:45:53.831 [info] [<unknown>][9624d698][ExtensionHostConnection] The client has reconnected.
+2025-01-27 02:37:05.620 [info] [<unknown>][a93d7631][ManagementConnection] The client has reconnected.
+2025-01-27 02:37:05.636 [info] [<unknown>][9624d698][ExtensionHostConnection] The client has reconnected.
+2025-01-27 02:53:52.248 [info] [<unknown>][a93d7631][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+2025-01-27 03:25:58.675 [info] [<unknown>][a93d7631][ManagementConnection] Another client has connected, will shorten the wait for reconnection 5m before disposing...
+2025-01-27 03:25:58.675 [info] [<unknown>][a93d7631][ManagementConnection] The client has reconnected.
+2025-01-27 03:30:59.070 [info] [<unknown>][9624d698][ExtensionHostConnection] <23488> Extension Host Process exited with code: 0, signal: null.
+2025-01-27 03:30:59.071 [info] Last EH closed, waiting before shutting down
+2025-01-27 03:35:59.073 [info] Last EH closed, shutting down

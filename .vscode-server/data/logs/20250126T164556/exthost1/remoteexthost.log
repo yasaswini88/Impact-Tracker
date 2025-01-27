@@ -1,0 +1,22 @@
+2025-01-26 16:46:08.975 [info] Extension host with pid 4774 started
+2025-01-26 16:46:09.001 [info] Lock '/home/ec2-user/.vscode-server/data/User/workspaceStorage/757cfc4be51aadb79623c814b6b2b323/vscode.lock': Lock acquired.
+2025-01-26 16:46:09.076 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: false, activationEvent: '*', root cause: vscode.git
+2025-01-26 16:46:09.077 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2025-01-26 16:46:09.208 [info] ExtensionService#_doActivateExtension vscode.git, startup: false, activationEvent: '*'
+2025-01-26 16:46:09.209 [info] ExtensionService#_doActivateExtension vscode.github, startup: false, activationEvent: '*'
+2025-01-26 16:46:09.567 [info] Eager extensions activated
+2025-01-26 16:46:09.567 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2025-01-26 16:46:09.568 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2025-01-26 16:46:09.568 [info] ExtensionService#_doActivateExtension GitHub.copilot, startup: false, activationEvent: 'onStartupFinished'
+2025-01-26 16:46:09.568 [info] ExtensionService#_doActivateExtension GitHub.copilot-chat, startup: false, activationEvent: 'onStartupFinished'
+2025-01-26 16:47:24.723 [info] ExtensionService#_doActivateExtension vscode.npm, startup: false, activationEvent: 'onTerminalQuickFixRequest:ms-vscode.npm-command'
+2025-01-26 16:47:30.054 [info] ExtensionService#_doActivateExtension vscode.configuration-editing, startup: false, activationEvent: 'onLanguage:json'
+2025-01-26 16:47:30.055 [info] ExtensionService#_doActivateExtension vscode.extension-editing, startup: false, activationEvent: 'onLanguage:json'
+2025-01-26 16:47:30.055 [info] ExtensionService#_doActivateExtension vscode.json-language-features, startup: false, activationEvent: 'onLanguage:json'
+2025-01-26 16:48:07.293 [error] EntryNotFound (FileSystemError): Error: ENOENT: no such file or directory, stat '/home/ec2-user/Impact-Tracker/.attach_pid5206'
+    at Function.e (file:///home/ec2-user/.vscode-server/cli/servers/Stable-cd4ee3b1c348a13bafd8f9ad8060705f6d4b9cba/server/out/vs/workbench/api/node/extensionHostProcess.js:115:9057)
+    at Object.stat (file:///home/ec2-user/.vscode-server/cli/servers/Stable-cd4ee3b1c348a13bafd8f9ad8060705f6d4b9cba/server/out/vs/workbench/api/node/extensionHostProcess.js:115:7007)
+    at Sh.value (/home/ec2-user/.vscode-server/extensions/github.copilot-chat-0.23.2/dist/extension.js:397:14992)
+2025-01-26 18:12:23.851 [info] Extension host terminating: received terminate message from renderer
+2025-01-26 18:12:23.851 [info] Lock '/home/ec2-user/.vscode-server/data/User/workspaceStorage/757cfc4be51aadb79623c814b6b2b323/vscode.lock': Marking the lockfile as scheduled to be released in 6000 ms.
+2025-01-26 18:12:23.932 [info] Extension host with pid 4774 exiting with code 0

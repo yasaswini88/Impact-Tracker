@@ -1,0 +1,36 @@
+package com.Impact_Tracker.Impact_Tracker.Controller;
+
+import com.Impact_Tracker.Impact_Tracker.Entity.WeatherForecast;
+import com.Impact_Tracker.Impact_Tracker.Service.WeatherForecastService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/weather-forecasts")
+public class WeatherForecastController {
+
+    @Autowired
+    private WeatherForecastService weatherForecastService;
+
+    /**
+     * Get all stored weather forecasts
+     */
+    @GetMapping
+    public ResponseEntity<List<WeatherForecast>> getAllForecasts() {
+        List<WeatherForecast> forecasts = weatherForecastService.getAllForecasts();
+        return ResponseEntity.ok(forecasts);
+    }
+
+    /**
+     * Manually trigger a fetch from OpenWeatherMap
+     * (If you want to test without waiting 15 min.)
+     */
+    @PostMapping("/fetch")
+    public ResponseEntity<String> fetchNow() {
+        weatherForecastService.fetchAndStoreForecast();
+        return ResponseEntity.ok("Forecast fetched and stored!");
+    }
+}

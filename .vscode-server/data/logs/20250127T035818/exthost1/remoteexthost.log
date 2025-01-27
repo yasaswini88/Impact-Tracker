@@ -1,0 +1,15 @@
+2025-01-27 03:58:20.583 [info] Extension host with pid 39624 started
+2025-01-27 03:58:20.601 [info] Lock '/home/ec2-user/.vscode-server/data/User/workspaceStorage/757cfc4be51aadb79623c814b6b2b323/vscode.lock': Lock acquired.
+2025-01-27 03:58:20.651 [info] ExtensionService#_doActivateExtension vscode.git-base, startup: false, activationEvent: '*', root cause: vscode.git
+2025-01-27 03:58:20.652 [info] ExtensionService#_doActivateExtension vscode.emmet, startup: false, activationEvent: 'onLanguage'
+2025-01-27 03:58:20.775 [info] ExtensionService#_doActivateExtension vscode.git, startup: false, activationEvent: '*'
+2025-01-27 03:58:20.776 [info] ExtensionService#_doActivateExtension vscode.github, startup: false, activationEvent: '*'
+2025-01-27 03:58:21.035 [info] Eager extensions activated
+2025-01-27 03:58:21.035 [info] ExtensionService#_doActivateExtension vscode.debug-auto-launch, startup: false, activationEvent: 'onStartupFinished'
+2025-01-27 03:58:21.036 [info] ExtensionService#_doActivateExtension vscode.merge-conflict, startup: false, activationEvent: 'onStartupFinished'
+2025-01-27 03:58:21.036 [info] ExtensionService#_doActivateExtension GitHub.copilot, startup: false, activationEvent: 'onStartupFinished'
+2025-01-27 03:58:21.036 [info] ExtensionService#_doActivateExtension GitHub.copilot-chat, startup: false, activationEvent: 'onStartupFinished'
+2025-01-27 04:57:48.295 [error] EntryNotFound (FileSystemError): Error: ENOENT: no such file or directory, stat '/home/ec2-user/Impact-Tracker/.attach_pid42060'
+    at Function.e (file:///home/ec2-user/.vscode-server/cli/servers/Stable-cd4ee3b1c348a13bafd8f9ad8060705f6d4b9cba/server/out/vs/workbench/api/node/extensionHostProcess.js:115:9057)
+    at Object.stat (file:///home/ec2-user/.vscode-server/cli/servers/Stable-cd4ee3b1c348a13bafd8f9ad8060705f6d4b9cba/server/out/vs/workbench/api/node/extensionHostProcess.js:115:7007)
+    at Sh.value (/home/ec2-user/.vscode-server/extensions/github.copilot-chat-0.23.2/dist/extension.js:397:14992)
