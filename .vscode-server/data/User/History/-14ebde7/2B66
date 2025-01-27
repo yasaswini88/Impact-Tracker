@@ -35,5 +35,3 @@ build/
 # Ignore application.properties
 application.properties
 *.jar
-.vscode-server/
-.vscode-server/data/User/History/

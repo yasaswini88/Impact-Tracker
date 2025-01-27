@@ -36,4 +36,3 @@ build/
 application.properties
 *.jar
 .vscode-server/
-.vscode-server/data/User/History/
