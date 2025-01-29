@@ -158,7 +158,7 @@ public class EndUserConfirmationController {
                 appt.setAppointmentDate(newDate.toString());
             }
 
-            // You could also adjust start/end times, if necessary.
+            
             // appt.setAppointmentStartTime(...);
             // appt.setAppointmentEndTime(...);
             appt.setAppointmentRescheduled("true");
