@@ -49,3 +49,6 @@ application.properties
 .vscode-server/data/User/History/
 **/.vscode/
 **/.vscode-server/
+.bash_history
+.mysql_history
+.m2/
