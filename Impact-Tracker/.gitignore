@@ -52,3 +52,4 @@ application.properties
 .bash_history
 .mysql_history
 .m2/
+.wget-hsts
