@@ -36,7 +36,19 @@ public class Business {
     @Column(nullable = false)  
     private String password;
 
+    @Column(nullable = true)  
+private String businessType;
 
+@Column(nullable = true) 
+private String businessSize = "small";  
+
+
+
+@Column(nullable = true)
+    private String address;
+
+    @Column(nullable = true,length=500)
+    private String googlePlacesLink; 
     // Constructors
     public Business() {
     }
@@ -130,6 +142,40 @@ public class Business {
     public void setPassword(String password) {
         this.password = password;
     }
+
+
+    public String getBusinessType() {
+        return businessType;
+    }
+
+    public void setBusinessType(String businessType) {
+        this.businessType = businessType;
+    }
+
+    public String getBusinessSize() {
+        return businessSize;
+    }
+
+    public void setBusinessSize(String businessSize) {
+        this.businessSize = businessSize;
+    }
+
+     public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getGooglePlacesLink() {
+        return googlePlacesLink;
+    }
+
+    public void setGooglePlacesLink(String googlePlacesLink) {
+        this.googlePlacesLink = googlePlacesLink;
+    }
+
 
     
 }

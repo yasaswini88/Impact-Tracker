@@ -60,8 +60,13 @@ public class BusinessService {
         existingBusiness.setPhoneNumber(businessDto.getPhoneNumber());
         existingBusiness.setEmail(businessDto.getEmail());
         existingBusiness.setZipCode(businessDto.getZipCode());
+        existingBusiness.setBusinessType(businessDto.getBusinessType());
+    existingBusiness.setBusinessSize(businessDto.getBusinessSize());
 
         existingBusiness.setPassword(businessDto.getPassword());
+
+        existingBusiness.setAddress(businessDto.getAddress());
+    existingBusiness.setGooglePlacesLink(businessDto.getGooglePlacesLink());
         Business updatedBusiness = businessRepository.save(existingBusiness);
         return mapToDto(updatedBusiness);
     }
@@ -92,6 +97,11 @@ public class BusinessService {
         dto.setEmail(business.getEmail());
         dto.setZipCode(business.getZipCode());
         dto.setPassword(business.getPassword()); 
+          dto.setBusinessType(business.getBusinessType());
+    dto.setBusinessSize(business.getBusinessSize());
+
+    dto.setAddress(business.getAddress());
+    dto.setGooglePlacesLink(business.getGooglePlacesLink());
 
         return dto;
     }
@@ -107,6 +117,17 @@ public class BusinessService {
         business.setZipCode(dto.getZipCode());
 
         business.setPassword(dto.getPassword());
+
+         business.setBusinessType(dto.getBusinessType());
+   
+    if (dto.getBusinessSize() == null) {
+        business.setBusinessSize("small");
+    } else {
+        business.setBusinessSize(dto.getBusinessSize());
+    }
+
+     business.setAddress(dto.getAddress());
+    business.setGooglePlacesLink(dto.getGooglePlacesLink());
 
         return business;
     }

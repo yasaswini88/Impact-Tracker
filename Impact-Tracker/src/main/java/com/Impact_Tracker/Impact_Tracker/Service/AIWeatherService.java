@@ -24,48 +24,65 @@ public class AIWeatherService {
     @Autowired
     private BusinessWeatherNotificationRepository notificationRepository;
 
-    // We keep the EmailService, but will comment out its usage:
     @Autowired
-    private EmailService emailService;
+    private EmailService emailService;  // Email functionality
 
     @Autowired
-    private TwilioStudioService twilioStudioService;
+    private TwilioStudioService twilioStudioService;  // Twilio functionality
 
     /**
-     * Runs every 15 minutes or so to handle new forecasts that the "AI" has not processed yet.
+     * Runs every 3 minutes to handle new forecasts that the "AI" has not processed yet.
      */
-    @Scheduled(cron = "0 0/3 * * * ?")
-    // @Scheduled(cron="0 1 1 * * *")
-    // @Scheduled(cron="0 1 1 * * *")
+    // @Scheduled(cron = "0 0/2 * * * ?")
+    @Scheduled(cron="0 1 1 * * *")
     public void checkAndHandleForecasts() {
         // 1) Get all forecasts
         List<WeatherForecast> forecasts = weatherForecastRepository.findAll();
-        for (WeatherForecast forecast : forecasts) {
 
-            // We treat "true" as AI-handled; everything else is not handled.
+        for (WeatherForecast forecast : forecasts) {
+            // We treat "true" as AI-handled; everything else means not handled yet
             if (forecast.getAiHandled() == null || !"true".equalsIgnoreCase(forecast.getAiHandled())) {
 
-                // 2) Check condition
+                // 2) Decide whether we should alert the business
                 if (shouldAlertBusiness(forecast)) {
-                    // For demonstration, we just pick the first business in the DB
-                    var someBusiness = businessRepository.findAll().stream().findFirst();
+                    // For demonstration, pick the first business in the DB
+                  
+var someBusiness = businessRepository.findAll().stream()
+    .filter(b -> b.getBusinessType() != null)
+    .filter(b -> b.getBusinessType().equalsIgnoreCase("Lawn Mowing"))
+    .findFirst();
 
-                    /*
-                    // =========================
-                    // COMMENTED-OUT EMAIL CODE
-                    // =========================
+
                     if (someBusiness.isPresent()) {
                         Long businessId = someBusiness.get().getBusinessId();
-                        String toEmail  = someBusiness.get().getEmail(); // from your business entity
+                        Long fcId = forecast.getForecastId();
 
-                        // Build the email body
-                        String subject  = "Weather Alert: " + forecast.getWeatherCondition();
+                        // =========================
+                        // 1) Send an EMAIL
+                        // =========================
+                        String toEmail = someBusiness.get().getEmail(); // from your business entity
+                        String subject = "Weather Alert: " + forecast.getWeatherCondition();
                         String bodyHtml = buildEmailHtml(forecast, businessId);
 
-                        // Send Email
                         emailService.sendEmailWithLinks(toEmail, subject, bodyHtml);
 
-                        // Save a new notification row
+                        // =========================
+                        // 2) Make a TWILIO PHONE CALL
+                        // =========================
+                        String phone = someBusiness.get().getPhoneNumber();
+                        String textForFlow = "Weather Alert! Press 1 for yes, Press 2 for no.";
+
+                        String callResult = twilioStudioService.createStudioExecution(
+                                phone,
+                                textForFlow,
+                                fcId,
+                                businessId
+                        );
+                        System.out.println("Twilio call result: " + callResult);
+
+                        // =========================
+                        // 3) Save a NOTIFICATION record
+                        // =========================
                         BusinessWeatherNotification notification = new BusinessWeatherNotification();
                         notification.setBusinessId(businessId);
                         notification.setForecastId(forecast.getForecastId());
@@ -78,51 +95,21 @@ public class AIWeatherService {
                         // Mark forecast.aiHandled='true'
                         forecast.setAiHandled("true");
                         forecast.setUpdatedAt(LocalDateTime.now());
+                      
                         weatherForecastRepository.save(forecast);
                     }
-                    */
 
-                    // =========================
-                    // ACTIVE PHONE-CALL CODE
-                    // =========================
-                    if (someBusiness.isPresent()) {
-                        Long businessId = someBusiness.get().getBusinessId();
-                        Long fcId       = forecast.getForecastId();
+                    else {
+    // If no "Lawn Mowing" business found, skip or mark forecast as handled
+    forecast.setAiHandled("true");
+    forecast.setUpdatedAt(LocalDateTime.now());
+    weatherForecastRepository.save(forecast);
+}
 
-                        // 1) Grab the phone number
-                        String phone = someBusiness.get().getPhoneNumber();
-
-                        // 2) Make the Twilio call
-                        String textForFlow = "Weather Alert! Press 1 for yes, Press 2 for no.";
-                        String callResult = twilioStudioService.createStudioExecution(
-                                phone,
-                                textForFlow,
-                                fcId,
-                                businessId
-                                // If you want to specify flowSid, add it as needed
-                                // e.g. , "FWa0b4b625f359513cd29d6e5f38e9345e"
-                        );
-                        System.out.println("Twilio call result: " + callResult);
-
-                        // 3) Save the notification
-                        BusinessWeatherNotification notification = new BusinessWeatherNotification();
-                        notification.setBusinessId(businessId);
-                        notification.setForecastId(forecast.getForecastId());
-                        notification.setStatus("SENT");
-                        notification.setBusinessConfirmed("PENDING");
-                        notification.setCreatedAt(LocalDateTime.now());
-                        notification.setUpdatedAt(LocalDateTime.now());
-                        notificationRepository.save(notification);
-
-                        // 4) Mark forecast.aiHandled = 'true'
-                        forecast.setAiHandled("true");
-                        forecast.setUpdatedAt(LocalDateTime.now());
-                        weatherForecastRepository.save(forecast);
-                    }
                 }
 
-                // Even if shouldAlertBusiness(...) is false, or someBusiness is not present,
-                // we still mark the forecast as handled to avoid repeated checks:
+                // Even if shouldAlertBusiness(...) is false OR no business found,
+                // mark the forecast as handled to avoid repeated checks
                 forecast.setAiHandled("true");
                 forecast.setUpdatedAt(LocalDateTime.now());
                 weatherForecastRepository.save(forecast);
@@ -132,7 +119,8 @@ public class AIWeatherService {
 
     /**
      * Decide whether we should alert the business about the forecast.
-     * Example condition: weatherCondition in {broken clouds, overcast clouds} OR severity = "High".
+     * Example condition: weatherCondition in {broken clouds, overcast clouds, scattered clouds, clear sky}
+     * OR severity = "High".
      */
     private boolean shouldAlertBusiness(WeatherForecast forecast) {
         String wc = forecast.getWeatherCondition();
@@ -141,16 +129,18 @@ public class AIWeatherService {
         if (sv == null) sv = "";
 
         boolean condition1 = wc.equalsIgnoreCase("broken clouds");
-
         boolean condition2 = wc.equalsIgnoreCase("overcast clouds");
         boolean condition3 = sv.equalsIgnoreCase("High");
         boolean condition4 = wc.equalsIgnoreCase("clear sky");
         boolean condition5 = wc.equalsIgnoreCase("scattered clouds");
-        return (condition1 || condition2 || condition3 || condition4 || condition5);
+       
+        boolean condition6 = wc.equalsIgnoreCase("few clouds");
+
+        return (condition1 || condition2 || condition3 || condition4 || condition5 || condition6);
     }
 
     /**
-     * Build HTML body for the email (currently not used, but retained in case you re-enable email).
+     * Build HTML body for the email (now used since we re-enabled emails).
      */
     private String buildEmailHtml(WeatherForecast forecast, Long businessId) {
         return "<html><body>"
@@ -159,10 +149,12 @@ public class AIWeatherService {
                 + " is " + forecast.getWeatherCondition() + "</p>"
                 + "<p>Do you want me to handle the appointments for you?</p>"
                 + "<p>"
-                + "<a href='http://52.3.145.159:8080/api/v1/ai-weather/handle-yes?forecastId=" + forecast.getForecastId()
-                    + "&businessId=" + businessId + "'>YES, handle</a><br>"
-                + "<a href='http://52.3.145.159:8080/api/v1/ai-weather/handle-no?forecastId=" + forecast.getForecastId()
-                    + "&businessId=" + businessId + "'>NO, ignore</a>"
+                + "<a href='http://52.3.145.159:8080/api/v1/ai-weather/handle-yes?forecastId="
+                    + forecast.getForecastId() + "&businessId=" + businessId
+                    + "'>YES, handle</a><br>"
+                + "<a href='http://52.3.145.159:8080/api/v1/ai-weather/handle-no?forecastId="
+                    + forecast.getForecastId() + "&businessId=" + businessId
+                    + "'>NO, ignore</a>"
                 + "</p>"
                 + "</body></html>";
     }

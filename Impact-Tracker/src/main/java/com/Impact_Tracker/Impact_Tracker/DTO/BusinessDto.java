@@ -13,6 +13,12 @@ public class BusinessDto {
 
     private String password;
 
+    private String businessType;
+private String businessSize; 
+
+ private String address;          
+    private String googlePlacesLink;
+
 
 
     public BusinessDto() {
@@ -81,4 +87,44 @@ public class BusinessDto {
     public void setPassword(String password) {
         this.password = password;
     }
+
+
+    public String getBusinessType() {
+        return businessType;
+    }
+
+    public void setBusinessType(String businessType) {
+        this.businessType = businessType;
+    }
+
+    public String getBusinessSize() {
+        return businessSize;
+    }
+
+    public void setBusinessSize(String businessSize) {
+        this.businessSize = businessSize;
+    }
+
+
+
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getGooglePlacesLink() {
+        return googlePlacesLink;
+    }
+
+    public void setGooglePlacesLink(String googlePlacesLink) {
+        this.googlePlacesLink = googlePlacesLink;
+    }
+
+    
+
+    
 }
