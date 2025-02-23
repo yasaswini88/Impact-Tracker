@@ -39,8 +39,8 @@ public class HotelNotificationService {
      * Runs daily at 1:01 AM.
      * CRON format: second, minute, hour, dayOfMonth, month, dayOfWeek
      */
-    // @Scheduled(cron = "0 1 1 * * *")       // Original daily schedule
-    @Scheduled(cron = "0 0/2 * * * ?")  // Run every 2 minutes for testing
+    @Scheduled(cron = "0 1 1 * * *")       // Original daily schedule
+    // @Scheduled(cron = "0 0/2 * * * ?")  // Run every 2 minutes for testing
     public void checkHotelNegativeReviews() {
         System.out.println("=== HotelNotificationService: Starting checkHotelNegativeReviews() ===");
 

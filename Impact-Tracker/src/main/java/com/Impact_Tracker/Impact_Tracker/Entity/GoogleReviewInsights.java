@@ -2,6 +2,9 @@ package com.Impact_Tracker.Impact_Tracker.Entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
+
 @Entity
 @Table(name = "google_review_insights")
 public class GoogleReviewInsights {
@@ -24,6 +27,9 @@ public class GoogleReviewInsights {
     @OneToOne
     @JoinColumn(name = "business_id", nullable = false)
     private Business business;
+
+     @Column(name = "analysis_date", nullable = true)
+    private LocalDateTime analysisDate;
 
     
 
@@ -61,4 +67,14 @@ public class GoogleReviewInsights {
     public void setBusiness(Business business) {
         this.business = business;
     }
+
+    public LocalDateTime getAnalysisDate() {
+        return analysisDate;
+    }
+
+
+    public void setAnalysisDate(LocalDateTime analysisDate) {
+        this.analysisDate = analysisDate;
+    }
+    
 }

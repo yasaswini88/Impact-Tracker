@@ -38,8 +38,8 @@ public class GoogleReviewService {
      * Scheduled method to fetch reviews from Apify for a particular business.
      * Example: run once daily at 2 AM server time
      */
-    // @Scheduled(cron = "0 0 5 * * *")  
-      @Scheduled(cron = "0 0/2 * * * ?")
+    @Scheduled(cron = "0 0 5 * * *")  
+    //   @Scheduled(cron = "0 0/2 * * * ?")
     public void fetchAndStoreReviews() throws InterruptedException {
     
         Long businessId = 3L;
@@ -109,7 +109,7 @@ public class GoogleReviewService {
 
         System.out.println("Fetching reviews from: " + datasetItemsUrl);
 
-        //datasetItemsUrl = "https://api.apify.com/v2/datasets/gzLpLNOmAHBEzkeJ9/items?clean=true&format=json&view=overview";
+        datasetItemsUrl = "https://api.apify.com/v2/datasets/gzLpLNOmAHBEzkeJ9/items?clean=true&format=json&view=overview";
 List<Map<String, Object>> reviewsList = restTemplate.getForObject(datasetItemsUrl, List.class);
 if (reviewsList == null || reviewsList.isEmpty()) {
     System.out.println("No reviews found");
@@ -123,21 +123,21 @@ for (Map<String, Object> reviewObj : reviewsList) {
     Integer stars = (starNumber != null ? starNumber.intValue() : null);
 
     // Grab the actual published date from the JSON
-    String publishedAtDateStr = (String) reviewObj.get("publishedAtDate");
+    // String publishedAtDateStr = (String) reviewObj.get("publishedAtDate");
 
-    LocalDateTime publishedAt = null;
-    if (publishedAtDateStr != null && !publishedAtDateStr.isEmpty()) {
-        // Parse the "2025-02-05T23:59:59.999Z" into LocalDateTime
-        OffsetDateTime odt = OffsetDateTime.parse(publishedAtDateStr, DateTimeFormatter.ISO_DATE_TIME);
-        publishedAt = odt.toLocalDateTime();
-    }
+    // LocalDateTime publishedAt = null;
+    // if (publishedAtDateStr != null && !publishedAtDateStr.isEmpty()) {
+    //     // Parse the "2025-02-05T23:59:59.999Z" into LocalDateTime
+    //     OffsetDateTime odt = OffsetDateTime.parse(publishedAtDateStr, DateTimeFormatter.ISO_DATE_TIME);
+    //     publishedAt = odt.toLocalDateTime();
+    // }
 
     if (reviewText != null && !reviewText.isEmpty()) {
         GoogleReview googleReview = new GoogleReview();
         googleReview.setReviewText(reviewText);
         googleReview.setStars(stars);
         googleReview.setBusiness(business);
-        googleReview.setPublishedAt(publishedAt);  
+        // googleReview.setPublishedAt(publishedAt);  
 
         googleReviewRepository.save(googleReview);
     }

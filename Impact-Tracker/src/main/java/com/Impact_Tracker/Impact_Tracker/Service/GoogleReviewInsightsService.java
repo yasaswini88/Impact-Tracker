@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 public class GoogleReviewInsightsService {
@@ -67,7 +68,17 @@ public class GoogleReviewInsightsService {
         // Call OpenAI
         System.out.println("Sending reviews to OpenAI for analysis...");
         String openAiResponse = openAiService.analyzeReviews(reviewTexts);
-        String cleanedResponse = openAiResponse.replaceAll("```", "").trim();
+        // String cleanedResponse = openAiResponse.replaceAll("```", "").trim();
+        // Ensure JSON starts at the correct position
+int firstBraceIndex = openAiResponse.indexOf("{");
+if (firstBraceIndex != -1) {
+    openAiResponse = openAiResponse.substring(firstBraceIndex); 
+}
+
+// Remove Markdown-style code blocks if present
+String cleanedResponse = openAiResponse.replaceAll("```json", "").replaceAll("```", "").trim();
+
+System.out.println("Cleaned OpenAI Response: " + cleanedResponse);
         System.out.println("Received response from OpenAI.");
 
         // Parse the JSON
@@ -85,8 +96,8 @@ String negativePoints = insightsNode.has("negative")
     ? insightsNode.path("negative").asText("") 
     : insightsNode.path("negative_points").asText("");
 
-String overallSummary = insightsNode.has("overall_summary") 
-    ? insightsNode.path("overall_summary").asText("") 
+String overallSummary = insightsNode.has("overall_summary")
+    ? insightsNode.path("overall_summary").asText("")
     : insightsNode.path("summary").asText("");
 
 
@@ -100,9 +111,12 @@ System.out.println("Overall Summary: " + overallSummary);
         System.out.println("Creating GoogleReviewInsights entity...");
         GoogleReviewInsights insightsEntity = new GoogleReviewInsights();
         insightsEntity.setBusiness(business);
+       
         insightsEntity.setPositivePoints(positivePoints);
         insightsEntity.setNegativePoints(negativePoints);
         insightsEntity.setInsights(overallSummary);
+
+        insightsEntity.setAnalysisDate(LocalDateTime.now());
 
         // Save to DB
         System.out.println("Saving insights to the database...");

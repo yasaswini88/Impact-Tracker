@@ -2,10 +2,14 @@ package com.Impact_Tracker.Impact_Tracker.Controller;
 
 import com.Impact_Tracker.Impact_Tracker.DTO.SentimentAnalysisDto;
 import com.Impact_Tracker.Impact_Tracker.DTO.WeeklySentimentStatsDto;
+import com.Impact_Tracker.Impact_Tracker.DTO.CallVolumeRequest;
 import com.Impact_Tracker.Impact_Tracker.Service.SentimentAnalysisService;
+import com.Impact_Tracker.Impact_Tracker.Entity.Business;
+import com.Impact_Tracker.Impact_Tracker.Repo.BusinessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -15,6 +19,11 @@ public class SentimentAnalysisController {
 
     @Autowired
     private SentimentAnalysisService sentimentAnalysisService;
+
+    @Autowired
+    private BusinessRepository businessRepository;
+
+
 
     // CREATE
     @PostMapping
@@ -71,6 +80,29 @@ public class SentimentAnalysisController {
         String summaryJson = sentimentAnalysisService.analyzeWeeklyTrend(businessId);
         return ResponseEntity.ok(summaryJson);
     }
+
+@PostMapping("/call-volume-trend/{businessId}")
+public ResponseEntity<String> getCallVolumeTrend(
+    @PathVariable("businessId") Long bizId,
+    @RequestBody CallVolumeRequest request
+) {
+    // 1) Look up the business by ID
+    Business biz = businessRepository.findById(bizId)
+            .orElseThrow(() -> new RuntimeException(
+                "Business not found with ID: " + bizId));
+
+    // 2) Pass that Business entity along with the call-volume arrays
+    String gptSummaryJson = sentimentAnalysisService.analyzeCallVolumeTrends(
+        request.getAnswered(),
+        request.getMissed(),
+        request.getVoicemail(),
+        request.getMonths(),
+        biz
+    );
+
+    return ResponseEntity.ok(gptSummaryJson);
+}
+
 
     // UPDATE
     @PutMapping("/{id}")

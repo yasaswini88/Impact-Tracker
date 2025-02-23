@@ -175,6 +175,23 @@ public String analyzeWeeklyTrend(Long businessId) {
         sentimentAnalysisRepository.deleteById(id);
     }
 
+
+public String analyzeCallVolumeTrends(
+    List<Integer> answered,
+    List<Integer> missed,
+    List<Integer> voicemail,
+    List<String> months,
+    Business biz
+) {
+    // We'll pass businessType and address to the OpenAiService method:
+    String businessType = biz.getBusinessType();
+    String address = biz.getAddress(); 
+
+    return openAiService.analyzeCallVolumeData(
+        answered, missed, voicemail, months, businessType, address
+    );
+}
+
   
     private SentimentAnalysisDto mapToDto(SentimentAnalysis sa) {
         SentimentAnalysisDto dto = new SentimentAnalysisDto();
@@ -201,4 +218,6 @@ public String analyzeWeeklyTrend(Long businessId) {
         
         return sa;
     }
+
+
 }
