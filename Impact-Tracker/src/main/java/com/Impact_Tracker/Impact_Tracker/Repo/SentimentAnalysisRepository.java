@@ -23,6 +23,10 @@ List<SentimentAnalysis> findByBusinessIdAndGeneratedAfter(
     @Param("bizId") Long businessId,
     @Param("startDate") LocalDateTime startDate
 );
+
+
+
+
+}
     
   
-}
