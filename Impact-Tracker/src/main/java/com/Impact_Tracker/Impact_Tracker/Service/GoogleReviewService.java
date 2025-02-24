@@ -38,7 +38,7 @@ public class GoogleReviewService {
      * Scheduled method to fetch reviews from Apify for a particular business.
      * Example: run once daily at 2 AM server time
      */
-    @Scheduled(cron = "0 0 5 * * *")  
+    // @Scheduled(cron = "0 0 5 * * *")  
     //   @Scheduled(cron = "0 0/2 * * * ?")
     public void fetchAndStoreReviews() throws InterruptedException {
     

@@ -13,6 +13,7 @@ import com.Impact_Tracker.Impact_Tracker.Service.TwilioStudioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
 
 @Service
@@ -180,6 +181,11 @@ public class BusinessCallCampaignStrategySelectionService {
         } else {
             System.out.println("No target audience specified. Skipping immediate calls.");
         }
+    }
+
+
+    public List<BusinessCallCampaignStrategySelection> getSubmissionsForBusiness(Long businessId) {
+        return selectionRepository.findAllByBusinessIdDesc(businessId);
     }
 
 }

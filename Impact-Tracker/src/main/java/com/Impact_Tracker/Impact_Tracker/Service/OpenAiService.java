@@ -162,17 +162,17 @@ public String analyzeCallVolumeData(
    String address
 ) {
     // Incorporate the type & address into your prompt
-    String prompt = "Analyze the monthly call volume data for a "
+    String prompt = "Assuming call volume is proportional to sales, Analyze the monthly call volume data for a "
         + (businessType != null ? businessType : "business")
         + " located at " + (address != null ? address : "Unknown Address") + ". "
-        + "We have Answered, Missed, and Voicemail counts for each month. " +
-        "Please return a SHORT summary of how call volume has changed or any notable trends, " +
-        "and also mention whether these trends are typical for this season in that location. " +
+        + "We have call counts for last 7 months. " +
+        "Please return a SHORT summary of down trend in the sales for  business  " +
+        "and also mention whether these trends are affecting this business. " +
         "Respond ONLY in valid JSON with one field 'call_volume_summary'.\n\n" +
         "Data:\n";
     for (int i = 0; i < months.size(); i++) {
-        prompt += String.format("Month: %s, Answered: %d, Missed: %d, Voicemail: %d\n",
-                    months.get(i), answered.get(i), missed.get(i), voicemail.get(i));
+        prompt += String.format("Month: %s, Answered: %d \n",
+                    months.get(i), answered.get(i));
     }
 
     // 2) Build the request body

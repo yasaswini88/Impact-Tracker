@@ -217,11 +217,14 @@ public class TwilioStudioService {
                 "/v2/Flows/" + Call_Campaign_FLOW_SID + "/Executions"
         );
 
-        String paramJson = "{"
-                + "\"CampaignMessage\":\"" + campaignMessage + "\","
-                + "\"campaignId\":\"" + dummyCampaignId + "\","
-                + "\"businessId\":\"" + businessId + "\""
-                + "}";
+       String safeCampaignMessage = campaignMessage.replace("\"", "\\\"");
+
+String paramJson = "{"
+    + "\"CampaignMessage\":\"" + safeCampaignMessage + "\","
+    + "\"campaignId\":\"" + dummyCampaignId + "\","
+    + "\"businessId\":\"" + businessId + "\""
+    + "}";
+
 
         System.out.println("Generated paramJson for campaign: " + paramJson);
 

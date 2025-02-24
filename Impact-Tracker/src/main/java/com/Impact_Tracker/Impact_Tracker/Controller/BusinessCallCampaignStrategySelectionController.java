@@ -5,11 +5,16 @@ import com.Impact_Tracker.Impact_Tracker.Service.BusinessCallCampaignStrategySel
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.Impact_Tracker.Impact_Tracker.Entity.BusinessCallCampaignStrategySelection;
+import java.util.List;
+
 
 /**
  * This controller handles the user’s call campaign form submissions,
  * storing multiple chosen strategies, plus voice & target audience.
  */
+
+
 @RestController
 @RequestMapping("/api/v1/call-campaign-selection")
 public class BusinessCallCampaignStrategySelectionController {
@@ -32,5 +37,12 @@ public class BusinessCallCampaignStrategySelectionController {
     ) {
         selectionService.saveSelections(request);
         return ResponseEntity.ok("Call Campaign Selection saved successfully!");
+    }
+
+    @GetMapping("/by-business/{businessId}")
+    public List<BusinessCallCampaignStrategySelection> getSubmissionsByBusiness(
+        @PathVariable Long businessId
+    ) {
+        return selectionService.getSubmissionsForBusiness(businessId);
     }
 }
