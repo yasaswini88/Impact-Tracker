@@ -26,7 +26,7 @@ public class BusinessCallCampaignStrategySelectionController {
      *   "targetAudience": "NEGATIVE"
      * }
      */
-    @PostMapping
+     @PostMapping
     public ResponseEntity<String> createSelections(
         @RequestBody CampaignSelectionRequest request
     ) {
