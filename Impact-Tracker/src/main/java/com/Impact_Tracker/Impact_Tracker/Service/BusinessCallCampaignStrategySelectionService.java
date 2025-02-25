@@ -4,16 +4,17 @@ import com.Impact_Tracker.Impact_Tracker.DTO.CampaignSelectionRequest;
 import com.Impact_Tracker.Impact_Tracker.Entity.Business;
 import com.Impact_Tracker.Impact_Tracker.Entity.CallCampaignStrategies;
 import com.Impact_Tracker.Impact_Tracker.Entity.BusinessCallCampaignStrategySelection;
+import com.Impact_Tracker.Impact_Tracker.Entity.CallCampaignOutgoingLog;   // <-- Make sure this is imported
+import com.Impact_Tracker.Impact_Tracker.Entity.SentimentAnalysis;
+
 import com.Impact_Tracker.Impact_Tracker.Repo.BusinessRepository;
 import com.Impact_Tracker.Impact_Tracker.Repo.CallCampaignStrategiesRepository;
 import com.Impact_Tracker.Impact_Tracker.Repo.BusinessCallCampaignStrategySelectionRepository;
-import com.Impact_Tracker.Impact_Tracker.Entity.SentimentAnalysis;
+import com.Impact_Tracker.Impact_Tracker.Repo.CallCampaignOutgoingLogRepository;
 import com.Impact_Tracker.Impact_Tracker.Repo.SentimentAnalysisRepository;
-import com.Impact_Tracker.Impact_Tracker.Service.TwilioStudioService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-
 import java.util.List;
 
 @Service
@@ -34,156 +35,124 @@ public class BusinessCallCampaignStrategySelectionService {
     @Autowired
     private TwilioStudioService twilioStudioService;
 
+    @Autowired
+    private CallCampaignOutgoingLogRepository callCampaignOutgoingLogRepository;
+
     /**
      * Save multiple rows in "business_call_campaign_strategy_selection"
-     * based on the user’s selected strategies in the form.
+     * and immediately make calls to the relevant audience.
      */
-    // public void saveSelections(CampaignSelectionRequest request) {
-    //     System.out.println("Entered (COMMENTED OUT) saveSelections with request: " + request);
-    //     // 1) Find the business
-    //     Business business = businessRepository.findById(request.getBusinessId())
-    //         .orElseThrow(() -> {
-    //             System.out.println("Business not found with ID: " + request.getBusinessId());
-    //             return new RuntimeException("Business not found with ID: " + request.getBusinessId());
-    //         });
-    //     System.out.println("Found business (COMMENTED OUT method): " + business);
-
-    //     // 2) For each strategyId in request, create a new row
-    //     for (Long strategyId : request.getStrategyIds()) {
-    //         System.out.println("Processing strategyId (COMMENTED OUT method): " + strategyId);
-    //         CallCampaignStrategies strategy = strategiesRepository.findById(strategyId)
-    //             .orElseThrow(() -> {
-    //                 System.out.println("Strategy not found with ID (COMMENTED OUT method): " + strategyId);
-    //                 return new RuntimeException("Strategy not found with ID: " + strategyId);
-    //             });
-    //         System.out.println("Found strategy (COMMENTED OUT method): " + strategy);
-
-    //         // 3) Build entity
-    //         BusinessCallCampaignStrategySelection selection = 
-    //             new BusinessCallCampaignStrategySelection();
-
-    //         selection.setBusiness(business);
-    //         selection.setCallCampaignStrategy(strategy);
-    //         selection.setCallCampaignVoice(request.getCallCampaignVoice());
-    //         selection.setTargetAudience(request.getTargetAudience());
-
-    //         // 4) Save each row
-    //         selectionRepository.save(selection);
-    //         System.out.println("Saved selection (COMMENTED OUT method): " + selection);
-    //     }
-    // }
-
     public void saveSelections(CampaignSelectionRequest request) {
-        System.out.println("Entered saveSelections with request: " + request);
-
-        // 1) Find the business
+        // 1) Find the Business
         Business business = businessRepository.findById(request.getBusinessId())
-            .orElseThrow(() -> {
-                System.out.println("Business not found with ID: " + request.getBusinessId());
-                return new RuntimeException("Business not found with ID: " + request.getBusinessId());
-            });
-        System.out.println("Found business: " + business);
+                .orElseThrow(() -> new RuntimeException("Business not found with ID: " + request.getBusinessId()));
 
-        // 2) For each strategyId in request, create/save a new row
+        // 2) For each chosen strategy, create "selection" AND do the calls
         for (Long strategyId : request.getStrategyIds()) {
-            System.out.println("Processing strategyId: " + strategyId);
+
+            // A) Look up strategy
             CallCampaignStrategies strategy = strategiesRepository.findById(strategyId)
-                .orElseThrow(() -> {
-                    System.out.println("Strategy not found with ID: " + strategyId);
-                    return new RuntimeException("Strategy not found with ID: " + strategyId);
-                });
-            System.out.println("Found strategy: " + strategy);
+                    .orElseThrow(() -> new RuntimeException("Strategy not found with ID: " + strategyId));
 
-            BusinessCallCampaignStrategySelection selection =
-                new BusinessCallCampaignStrategySelection();
-
+            // B) Create the selection record
+            BusinessCallCampaignStrategySelection selection = new BusinessCallCampaignStrategySelection();
             selection.setBusiness(business);
             selection.setCallCampaignStrategy(strategy);
             selection.setCallCampaignVoice(request.getCallCampaignVoice());
             selection.setTargetAudience(request.getTargetAudience());
-
             selectionRepository.save(selection);
-            System.out.println("Saved selection: " + selection);
-        }
 
-        // 3) **Immediately** call the relevant audience if user wants POSITIVE/NEGATIVE/ALL
-        if (request.getTargetAudience() != null) {
-            String target = request.getTargetAudience().toUpperCase();
-            System.out.println("Target audience is: " + target);
+            // C) Decide whom to call based on targetAudience
+            if (request.getTargetAudience() != null) {
+                String target = request.getTargetAudience().toUpperCase();
 
-            if ("POSITIVE".equals(target)) {
-                System.out.println("Fetching Positive sentiment records...");
-                List<SentimentAnalysis> positiveList =
-                    sentimentAnalysisRepository.findByBusiness_BusinessIdAndSentiment(
-                        request.getBusinessId(),
-                        "Positive"
-                    );
-                System.out.println("Number of Positive records found: " + positiveList.size());
-
-                for (SentimentAnalysis sa : positiveList) {
-                    String phone = sa.getClientPhoneNumber();
-                    System.out.println("Calling phone (Positive): " + phone);
-                    if (phone != null && !phone.isEmpty()) {
-                        twilioStudioService.createStudioExecutionForCampaign(
-                                phone,
-                                request.getCallCampaignVoice(),
-                                999L,
-                                request.getBusinessId()
-                        );
+                if ("POSITIVE".equals(target)) {
+                    List<SentimentAnalysis> positiveList =
+                            sentimentAnalysisRepository.findByBusiness_BusinessIdAndSentiment(
+                                    request.getBusinessId(),
+                                    "Positive"
+                            );
+                    for (SentimentAnalysis sa : positiveList) {
+                        String phone = sa.getClientPhoneNumber();
+                        if (phone != null && !phone.isEmpty()) {
+                            // 1) Call Twilio
+                            String twilioResponse = twilioStudioService.createStudioExecutionForCampaign(
+                                    phone,
+                                    request.getCallCampaignVoice(),
+                                    999L,
+                                    request.getBusinessId()
+                            );
+                            // 2) Create log
+                            CallCampaignOutgoingLog log = new CallCampaignOutgoingLog();
+                            log.setStrategySelection(selection);
+                            log.setClientPhoneNumber(phone);
+                            log.setTwilioResponse(twilioResponse);
+                            callCampaignOutgoingLogRepository.save(log);
+                        }
                     }
+
+                } else if ("NEGATIVE".equals(target)) {
+                    List<SentimentAnalysis> negativeList =
+                            sentimentAnalysisRepository.findByBusiness_BusinessIdAndSentiment(
+                                    request.getBusinessId(),
+                                    "Negative"
+                            );
+                    for (SentimentAnalysis sa : negativeList) {
+                        String phone = sa.getClientPhoneNumber();
+                        if (phone != null && !phone.isEmpty()) {
+                            String twilioResponse = twilioStudioService.createStudioExecutionForCampaign(
+                                    phone,
+                                    request.getCallCampaignVoice(),
+                                    999L,
+                                    request.getBusinessId()
+                            );
+                            CallCampaignOutgoingLog log = new CallCampaignOutgoingLog();
+                            log.setStrategySelection(selection);
+                            log.setClientPhoneNumber(phone);
+                            log.setTwilioResponse(twilioResponse);
+                            callCampaignOutgoingLogRepository.save(log);
+                        }
+                    }
+
+                } else if ("ALL".equals(target)) {
+                    List<SentimentAnalysis> allList = sentimentAnalysisRepository
+                            .findAll()
+                            .stream()
+                            .filter(sa -> sa.getBusiness().getBusinessId().equals(request.getBusinessId()))
+                            .toList();
+                    for (SentimentAnalysis sa : allList) {
+                        String phone = sa.getClientPhoneNumber();
+                        if (phone != null && !phone.isEmpty()) {
+                            String twilioResponse = twilioStudioService.createStudioExecutionForCampaign(
+                                    phone,
+                                    request.getCallCampaignVoice(),
+                                    999L,
+                                    request.getBusinessId()
+                            );
+                            CallCampaignOutgoingLog log = new CallCampaignOutgoingLog();
+                            log.setStrategySelection(selection);
+                            log.setClientPhoneNumber(phone);
+                            log.setTwilioResponse(twilioResponse);
+                            callCampaignOutgoingLogRepository.save(log);
+                        }
+                    }
+
+                } else {
+                    // If the string isn't POSITIVE, NEGATIVE, or ALL
+                    System.out.println("Target audience does not match POSITIVE, NEGATIVE, or ALL. No calls made.");
                 }
 
-            } else if ("NEGATIVE".equals(target)) {
-                System.out.println("Fetching Negative sentiment records...");
-                List<SentimentAnalysis> negativeList =
-                    sentimentAnalysisRepository.findByBusiness_BusinessIdAndSentiment(
-                        request.getBusinessId(),
-                        "Negative"
-                    );
-                System.out.println("Number of Negative records found: " + negativeList.size());
-
-                for (SentimentAnalysis sa : negativeList) {
-                    String phone = sa.getClientPhoneNumber();
-                    System.out.println("Calling phone (Negative): " + phone);
-                    if (phone != null && !phone.isEmpty()) {
-                        twilioStudioService.createStudioExecutionForCampaign(
-                                phone,
-                                request.getCallCampaignVoice(),
-                                999L,
-                                request.getBusinessId()
-                        );
-                    }
-                }
-
-            } else if ("ALL".equals(target)) {
-                System.out.println("Fetching ALL sentiment records for this business...");
-                List<SentimentAnalysis> allList = sentimentAnalysisRepository.findAll()
-                        .stream()
-                        .filter(sa -> sa.getBusiness().getBusinessId().equals(request.getBusinessId()))
-                        .toList();
-                System.out.println("Number of ALL sentiment records found: " + allList.size());
-
-                for (SentimentAnalysis sa : allList) {
-                    String phone = sa.getClientPhoneNumber();
-                    System.out.println("Calling phone (ALL): " + phone);
-                    if (phone != null && !phone.isEmpty()) {
-                        twilioStudioService.createStudioExecutionForCampaign(
-                                phone,
-                                request.getCallCampaignVoice(),
-                                999L,
-                                request.getBusinessId()
-                        );
-                    }
-                }
             } else {
-                System.out.println("Target audience does not match POSITIVE, NEGATIVE, or ALL. No calls made.");
+                // If no target audience was specified at all
+                System.out.println("No target audience specified. Skipping immediate calls.");
             }
-        } else {
-            System.out.println("No target audience specified. Skipping immediate calls.");
-        }
+
+        } // end for loop
     }
 
-
+    /**
+     * Example method if you want to list all submissions for a business.
+     */
     public List<BusinessCallCampaignStrategySelection> getSubmissionsForBusiness(Long businessId) {
         return selectionRepository.findAllByBusinessIdDesc(businessId);
     }
