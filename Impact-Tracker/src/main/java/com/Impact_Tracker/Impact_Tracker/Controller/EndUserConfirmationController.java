@@ -82,6 +82,10 @@ public class EndUserConfirmationController {
             @RequestParam("digit") String digit,
             @RequestParam("businessId") Long businessId
     ) {
+        System.out.println("AppointmentId " + appointmentId);
+        System.out.println("digit" + digit);
+        System.out.println("BusinessId " + businessId);
+
         // 1) Find EndUserConfirmation row in "PENDING"
         Optional<EndUserConfirmation> eucOpt = endUserConfirmationRepository.findAll().stream()
                 .filter(euc -> euc.getAppointmentId().equals(appointmentId))
@@ -93,7 +97,12 @@ public class EndUserConfirmationController {
             return "Already responded or invalid appointment.";
         }
 
+
+
         EndUserConfirmation euc = eucOpt.get();
+
+        System.out.println("end user coonfirmation called");
+        System.out.println("digit prssed by end user" + digit);
 
         // 2) Decide based on digit
         switch (digit) {

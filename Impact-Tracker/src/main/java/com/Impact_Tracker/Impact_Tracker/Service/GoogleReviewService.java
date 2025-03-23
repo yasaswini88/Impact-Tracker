@@ -42,7 +42,7 @@ public class GoogleReviewService {
     //   @Scheduled(cron = "0 0/2 * * * ?")
     public void fetchAndStoreReviews() throws InterruptedException {
     
-        Long businessId = 3L;
+        Long businessId = 6L;
         Business business = businessRepository.findById(businessId)
             .orElseThrow(() -> new RuntimeException("Business not found"));
 
@@ -109,7 +109,8 @@ public class GoogleReviewService {
 
         System.out.println("Fetching reviews from: " + datasetItemsUrl);
 
-        datasetItemsUrl = "https://api.apify.com/v2/datasets/gzLpLNOmAHBEzkeJ9/items?clean=true&format=json&view=overview";
+        // datasetItemsUrl = "https://api.apify.com/v2/datasets/gzLpLNOmAHBEzkeJ9/items?clean=true&format=json&view=overview";
+        datasetItemsUrl= "https://api.apify.com/v2/datasets/xQfZi1ahB1IAgVZ1R/items?clean=true&format=json&limit=1000&view=overview";
 List<Map<String, Object>> reviewsList = restTemplate.getForObject(datasetItemsUrl, List.class);
 if (reviewsList == null || reviewsList.isEmpty()) {
     System.out.println("No reviews found");

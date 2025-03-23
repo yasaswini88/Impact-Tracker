@@ -47,8 +47,8 @@ public class EndUserNotificationService {
      *  - Looks for businessConfirmed='Y' and status='RESPONDED' (meaning the business said "Yes")
      *  - Sends emails to customers, sets BWN status to EMAIL_HANDLED (not fully Handled yet).
      */
-    // @Scheduled(cron = "0 0/2 * * * ?")
-    // @Scheduled(cron = "0 1 1 * * *")
+    // @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 1 1 * * *")
     public void sendEmailNotificationsToEndUsers() {
         // 1) Find BWN records with business_confirmed='Y' and status='RESPONDED'
         List<BusinessWeatherNotification> pendingNotifications =
@@ -126,7 +126,7 @@ public class EndUserNotificationService {
      *  - Looks for businessConfirmed='Y' and status='EMAIL_HANDLED'
      *  - Makes the Twilio phone calls, then sets BWN status to 'Handled' finally
      */
-    @Scheduled(cron = "0 0/3 * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     public void callEndUsersForReschedule() {
         // 1) Find BWN records with business_confirmed='Y' and status='EMAIL_HANDLED'
         List<BusinessWeatherNotification> pendingNotifications =
