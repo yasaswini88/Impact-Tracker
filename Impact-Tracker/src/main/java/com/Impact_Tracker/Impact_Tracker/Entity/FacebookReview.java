@@ -19,7 +19,11 @@ public class FacebookReview {
     private Integer commentsCount;
 
     private String reviewerName;
-    private String reviewerProfilePicUrl;
+
+    @Column(length = 1000)
+private String reviewerProfilePicUrl;
+
+    // private String reviewerProfilePicUrl;
 
     @ManyToOne
     @JoinColumn(name = "business_id", nullable = false)

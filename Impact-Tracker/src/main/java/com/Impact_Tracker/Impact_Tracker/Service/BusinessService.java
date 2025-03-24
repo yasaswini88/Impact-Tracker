@@ -2,10 +2,13 @@ package com.Impact_Tracker.Impact_Tracker.Service;
 
 import com.Impact_Tracker.Impact_Tracker.DTO.BusinessDto;
 import com.Impact_Tracker.Impact_Tracker.Entity.Business;
+import com.Impact_Tracker.Impact_Tracker.Entity.Plans;
 import com.Impact_Tracker.Impact_Tracker.Repo.BusinessRepository;
+import com.Impact_Tracker.Impact_Tracker.Repo.PlansRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -17,42 +20,31 @@ public class BusinessService {
     @Autowired
     private BusinessRepository businessRepository;
 
-    /**
-     * Create a new Business record
-     */
+    @Autowired
+    private PlansRepository plansRepository;
+
     public BusinessDto createBusiness(BusinessDto businessDto) {
         Business business = mapToEntity(businessDto);
+        business.setCreatedDate(LocalDateTime.now());
         Business savedBusiness = businessRepository.save(business);
         return mapToDto(savedBusiness);
     }
 
-    /**
-     * Get a Business by its ID
-     */
     public BusinessDto getBusinessById(Long businessId) {
         Business business = businessRepository.findById(businessId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Business not found with ID: " + businessId));
+                .orElseThrow(() -> new RuntimeException("Business not found with ID: " + businessId));
         return mapToDto(business);
     }
 
-    /**
-     * Get all Businesses
-     */
     public List<BusinessDto> getAllBusinesses() {
         List<Business> businesses = businessRepository.findAll();
         return businesses.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
-    /**
-     * Update a Business by ID
-     */
     public BusinessDto updateBusiness(Long businessId, BusinessDto businessDto) {
         Business existingBusiness = businessRepository.findById(businessId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Business not found with ID: " + businessId));
+                .orElseThrow(() -> new RuntimeException("Business not found with ID: " + businessId));
 
-        // Update fields
         existingBusiness.setRegistrationNumber(businessDto.getRegistrationNumber());
         existingBusiness.setBusinessName(businessDto.getBusinessName());
         existingBusiness.setOpeningTime(parseStringToLocalTime(businessDto.getOpeningTime()));
@@ -61,19 +53,25 @@ public class BusinessService {
         existingBusiness.setEmail(businessDto.getEmail());
         existingBusiness.setZipCode(businessDto.getZipCode());
         existingBusiness.setBusinessType(businessDto.getBusinessType());
-    existingBusiness.setBusinessSize(businessDto.getBusinessSize());
-
+        existingBusiness.setBusinessSize(businessDto.getBusinessSize());
         existingBusiness.setPassword(businessDto.getPassword());
-
         existingBusiness.setAddress(businessDto.getAddress());
-    existingBusiness.setGooglePlacesLink(businessDto.getGooglePlacesLink());
+        existingBusiness.setGooglePlacesLink(businessDto.getGooglePlacesLink());
+
+        if (businessDto.getPlanId() != null) {
+            Plans plan = plansRepository.findById(businessDto.getPlanId())
+                    .orElseThrow(() -> new RuntimeException("Plan not found with ID: " + businessDto.getPlanId()));
+            existingBusiness.setPlan(plan);
+        }
+
+        if (businessDto.getDateOfPlanUpdated() != null) {
+            existingBusiness.setDateOfPlanUpdated(LocalDateTime.parse(businessDto.getDateOfPlanUpdated()));
+        }
+
         Business updatedBusiness = businessRepository.save(existingBusiness);
         return mapToDto(updatedBusiness);
     }
 
-    /**
-     * Delete a Business by ID
-     */
     public void deleteBusiness(Long businessId) {
         if (!businessRepository.existsById(businessId)) {
             throw new RuntimeException("Business not found with ID: " + businessId);
@@ -81,27 +79,31 @@ public class BusinessService {
         businessRepository.deleteById(businessId);
     }
 
-    // ---------------------------------------------------------------
-    // Helper methods for converting between DTO and Entity
-    // ---------------------------------------------------------------
     private BusinessDto mapToDto(Business business) {
         BusinessDto dto = new BusinessDto();
         dto.setBusinessId(business.getBusinessId());
         dto.setRegistrationNumber(business.getRegistrationNumber());
         dto.setBusinessName(business.getBusinessName());
-        dto.setOpeningTime(business.getOpeningTime() == null 
-                ? null : business.getOpeningTime().toString());
-        dto.setClosingTime(business.getClosingTime() == null 
-                ? null : business.getClosingTime().toString());
+        dto.setOpeningTime(business.getOpeningTime() == null ? null : business.getOpeningTime().toString());
+        dto.setClosingTime(business.getClosingTime() == null ? null : business.getClosingTime().toString());
         dto.setPhoneNumber(business.getPhoneNumber());
         dto.setEmail(business.getEmail());
         dto.setZipCode(business.getZipCode());
-        dto.setPassword(business.getPassword()); 
-          dto.setBusinessType(business.getBusinessType());
-    dto.setBusinessSize(business.getBusinessSize());
+        dto.setPassword(business.getPassword());
+        dto.setBusinessType(business.getBusinessType());
+        dto.setBusinessSize(business.getBusinessSize());
+        dto.setAddress(business.getAddress());
+        dto.setGooglePlacesLink(business.getGooglePlacesLink());
 
-    dto.setAddress(business.getAddress());
-    dto.setGooglePlacesLink(business.getGooglePlacesLink());
+        int ageOfAccount = (business.getCreatedDate() != null) ? 
+            (LocalDateTime.now().getYear() - business.getCreatedDate().getYear()) : 0;
+        dto.setAgeOfAccount(ageOfAccount);
+
+        dto.setPlanId(business.getPlan() != null ? business.getPlan().getPlanId() : null);
+        dto.setDateOfPlanUpdated(business.getDateOfPlanUpdated() != null
+                ? business.getDateOfPlanUpdated().toString() : null);
+
+        dto.setPlanName(business.getPlan() != null ? business.getPlan().getPlanName() : null);
 
         return dto;
     }
@@ -115,26 +117,31 @@ public class BusinessService {
         business.setPhoneNumber(dto.getPhoneNumber());
         business.setEmail(dto.getEmail());
         business.setZipCode(dto.getZipCode());
-
         business.setPassword(dto.getPassword());
+        business.setBusinessType(dto.getBusinessType());
 
-         business.setBusinessType(dto.getBusinessType());
-   
-    if (dto.getBusinessSize() == null) {
-        business.setBusinessSize("small");
-    } else {
-        business.setBusinessSize(dto.getBusinessSize());
-    }
+        if (dto.getBusinessSize() == null) {
+            business.setBusinessSize("small");
+        } else {
+            business.setBusinessSize(dto.getBusinessSize());
+        }
 
-     business.setAddress(dto.getAddress());
-    business.setGooglePlacesLink(dto.getGooglePlacesLink());
+        business.setAddress(dto.getAddress());
+        business.setGooglePlacesLink(dto.getGooglePlacesLink());
+
+        if (dto.getPlanId() != null) {
+            Plans plan = plansRepository.findById(dto.getPlanId())
+                    .orElseThrow(() -> new RuntimeException("Plan not found with ID: " + dto.getPlanId()));
+            business.setPlan(plan);
+        }
+
+        if (dto.getDateOfPlanUpdated() != null) {
+            business.setDateOfPlanUpdated(LocalDateTime.parse(dto.getDateOfPlanUpdated()));
+        }
 
         return business;
     }
 
-    /**
-     * Convert a "HH:mm" string to LocalTime
-     */
     private LocalTime parseStringToLocalTime(String timeString) {
         if (timeString == null || timeString.isEmpty()) {
             return null;

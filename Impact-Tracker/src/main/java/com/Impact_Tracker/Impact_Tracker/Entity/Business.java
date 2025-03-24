@@ -2,6 +2,9 @@ package com.Impact_Tracker.Impact_Tracker.Entity;
 
 import jakarta.persistence.*;
 import java.time.LocalTime;
+import com.Impact_Tracker.Impact_Tracker.Entity.Plans;
+import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "business")
@@ -44,11 +47,31 @@ private String businessSize = "small";
 
 
 
+
+
 @Column(nullable = true)
     private String address;
 
     @Column(nullable = true,length=500)
     private String googlePlacesLink; 
+
+
+//     @Column(nullable = true)
+// private Integer ageOfAccount;
+
+
+@Column(nullable = true)
+private LocalDateTime createdDate = LocalDateTime.now();
+
+
+@ManyToOne
+@JoinColumn(name = "plan_id")
+private Plans plan;
+
+@Column(nullable = true)
+private LocalDateTime dateOfPlanUpdated;
+
+
     // Constructors
     public Business() {
     }
@@ -175,6 +198,46 @@ private String businessSize = "small";
     public void setGooglePlacesLink(String googlePlacesLink) {
         this.googlePlacesLink = googlePlacesLink;
     }
+
+
+    // public Integer getAgeOfAccount() {
+    //     return ageOfAccount;
+    // }
+
+    // public void setAgeOfAccount(Integer ageOfAccount) {
+    //     this.ageOfAccount = ageOfAccount;
+    // }
+
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+
+
+
+    public Plans getPlan() {
+        return plan;
+    }
+
+
+    public void setPlan(Plans plan) {
+        this.plan = plan;
+    }
+
+    public LocalDateTime getDateOfPlanUpdated() {
+        return dateOfPlanUpdated;
+    }
+
+    public void setDateOfPlanUpdated(LocalDateTime dateOfPlanUpdated) {
+        this.dateOfPlanUpdated = dateOfPlanUpdated;
+    }
+
+
 
 
     

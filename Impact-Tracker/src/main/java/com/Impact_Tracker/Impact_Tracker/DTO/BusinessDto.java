@@ -20,6 +20,12 @@ private String businessSize;
     private String googlePlacesLink;
 
 
+private Integer ageOfAccount;
+private Long planId; 
+private String planName;
+
+private String dateOfPlanUpdated; 
+
 
     public BusinessDto() {
     }
@@ -123,6 +129,47 @@ private String businessSize;
     public void setGooglePlacesLink(String googlePlacesLink) {
         this.googlePlacesLink = googlePlacesLink;
     }
+
+    public Integer getAgeOfAccount() {
+        return ageOfAccount;
+    }
+
+    public void setAgeOfAccount(Integer ageOfAccount) {
+        this.ageOfAccount = ageOfAccount;
+    }
+
+
+    public Long getPlanId() {
+        return planId;
+    }
+
+
+    public void setPlanId(Long planId) {
+        this.planId = planId;
+    }
+
+
+    public String getDateOfPlanUpdated() {
+        return dateOfPlanUpdated;
+    }
+
+
+    public void setDateOfPlanUpdated(String dateOfPlanUpdated) {
+        this.dateOfPlanUpdated = dateOfPlanUpdated;
+    }
+
+
+    public String getPlanName() {
+        return planName;
+    }
+
+
+    public void setPlanName(String planName) {
+        this.planName = planName;
+    }
+
+
+    
 
     
 

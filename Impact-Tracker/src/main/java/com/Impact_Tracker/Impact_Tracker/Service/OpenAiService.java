@@ -158,8 +158,13 @@ public class OpenAiService {
 
     public String generateSeasonalTrends(String businessType, String googlePlacesLink) {
         String prompt = "Provide estimated seasonal demand month-wise for a " + businessType
-                + " business located at " + googlePlacesLink + ". Respond strictly in JSON:\n"
-                + "{\"January\":value,\"February\":value,...,\"December\":value}";
+            + " business located at " + googlePlacesLink + ". "
+            + "The demand should be on a percentage scale where 0% is no demand and 100% is the peak demand month. "
+            + "Ensure that one or more months (typically summer) have values close to 100%, "
+            + "winter months have lower percentages, and show a smooth seasonal variation. "
+            + "Respond strictly in JSON format like this:\n"
+            + "{\"January\":percentage,\"February\":percentage,...,\"December\":percentage} "
+            + "Only output the JSON, with no extra text.";
 
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-3.5-turbo",
@@ -184,4 +189,44 @@ public class OpenAiService {
             throw new RuntimeException("OpenAI API failed: " + response.getStatusCode());
         }
     }
+
+    public String generateGlobalSeasonalTrends(String businessType, String location) {
+    String prompt = String.format(
+        "Provide estimated global seasonal demand (month-wise) for %s businesses. " +
+        "Demand should be represented on a percentage scale from 0%% (lowest demand) to 100%% (highest demand month). " +
+        "The response must strictly be in JSON format:\n" +
+        "{\"January\":percentage,\"February\":percentage,\"March\":percentage,\"April\":percentage,\"May\":percentage,\"June\":percentage,\"July\":percentage,\"August\":percentage,\"September\":percentage,\"October\":percentage,\"November\":percentage,\"December\":percentage}. " +
+        "Return only the JSON without any additional text.",
+        businessType
+    );
+
+    Map<String, Object> requestBody = Map.of(
+        "model", "gpt-3.5-turbo",
+        "messages", List.of(
+            Map.of("role", "system", "content", "You generate month-wise seasonal demand trends."),
+            Map.of("role", "user", "content", prompt)
+        ),
+        "temperature", 0.5
+    );
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setBearerAuth(apiKey);
+
+    HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+    ResponseEntity<Map> response = restTemplate.exchange(
+        OPENAI_URL,
+        HttpMethod.POST,
+        requestEntity,
+        Map.class
+    );
+
+    if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+        return extractInsights(response.getBody());
+    } else {
+        throw new RuntimeException("OpenAI API failed: " + response.getStatusCodeValue());
+    }
+}
+
 }
