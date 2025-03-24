@@ -60,42 +60,84 @@ public class OpenAiService {
         }
     }
 
+    // public String analyzeWeeklyTrendData(List<String> lines) {
+    //     if (lines.isEmpty()) {
+    //         return "{\"trend_summary\": \"No data for this period.\"}";
+    //     }
+
+    //     String prompt = "Analyze these phone call reviews with their creation dates. Summarize how sentiment has changed " +
+    //             "or progressed over the past week in 1-2 sentences. " +
+    //             "Return your response in valid JSON with a single field: 'trend_summary'. " +
+    //             "Here is the data:\n" +
+    //             String.join("\n", lines);
+
+    //     Map<String, Object> requestBody = Map.of(
+    //             "model", "gpt-3.5-turbo",
+    //             "messages", List.of(
+    //                     Map.of("role", "system", "content",
+    //                             "You are an AI that analyzes customer reviews and extracts short trend summaries."),
+    //                     Map.of("role", "user", "content", prompt)
+    //             ),
+    //             "temperature", 0.7
+    //     );
+
+    //     HttpHeaders headers = new HttpHeaders();
+    //     headers.setContentType(MediaType.APPLICATION_JSON);
+    //     headers.setBearerAuth(apiKey);
+
+    //     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+    //     ResponseEntity<Map> response =
+    //             restTemplate.exchange(OPENAI_URL, HttpMethod.POST, requestEntity, Map.class);
+
+    //     if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+    //         return extractInsights(response.getBody());
+    //     } else {
+    //         return "{\"trend_summary\": \"OpenAI request failed with status: " +
+    //                 response.getStatusCodeValue() + "\"}";
+    //     }
+    // }
+
     public String analyzeWeeklyTrendData(List<String> lines) {
-        if (lines.isEmpty()) {
-            return "{\"trend_summary\": \"No data for this period.\"}";
-        }
-
-        String prompt = "Analyze these phone call reviews with their creation dates. Summarize how sentiment has changed " +
-                "or progressed over the past week in 1-2 sentences. " +
-                "Return your response in valid JSON with a single field: 'trend_summary'. " +
-                "Here is the data:\n" +
-                String.join("\n", lines);
-
-        Map<String, Object> requestBody = Map.of(
-                "model", "gpt-3.5-turbo",
-                "messages", List.of(
-                        Map.of("role", "system", "content",
-                                "You are an AI that analyzes customer reviews and extracts short trend summaries."),
-                        Map.of("role", "user", "content", prompt)
-                ),
-                "temperature", 0.7
-        );
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiKey);
-
-        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<Map> response =
-                restTemplate.exchange(OPENAI_URL, HttpMethod.POST, requestEntity, Map.class);
-
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            return extractInsights(response.getBody());
-        } else {
-            return "{\"trend_summary\": \"OpenAI request failed with status: " +
-                    response.getStatusCodeValue() + "\"}";
-        }
+    if (lines.isEmpty()) {
+        return "{\"trend_summary\": \"No data for this period.\", \"overall_sentiment\": \"Neutral\"}";
     }
+
+    String prompt = "Analyze these phone call reviews with their creation dates. " +
+            "Summarize how sentiment has changed or progressed over the past week in 1-2 sentences. " +
+            "Also, provide an overall sentiment as a single word: Positive, Negative, or Neutral, based on the reviews. " +
+            "Return your response strictly in valid JSON format:\n" +
+            "{\n" +
+            "  \"trend_summary\": \"...\",\n" +
+            "  \"overall_sentiment\": \"Positive\"|\"Negative\"|\"Neutral\"\n" +
+            "}\n" +
+            "Here is the data:\n" +
+            String.join("\n", lines);
+
+    Map<String, Object> requestBody = Map.of(
+            "model", "gpt-3.5-turbo",
+            "messages", List.of(
+                    Map.of("role", "system", "content",
+                            "You are an AI that analyzes customer reviews and extracts short trend summaries along with overall sentiment."),
+                    Map.of("role", "user", "content", prompt)
+            ),
+            "temperature", 0.7
+    );
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setBearerAuth(apiKey);
+
+    HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+    ResponseEntity<Map> response =
+            restTemplate.exchange(OPENAI_URL, HttpMethod.POST, requestEntity, Map.class);
+
+    if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+        return extractInsights(response.getBody());
+    } else {
+        return "{\"trend_summary\": \"OpenAI request failed.\", \"overall_sentiment\": \"Neutral\"}";
+    }
+}
+
 
     private String extractInsights(Map<String, Object> responseBody) {
         List<Map<String, Object>> choices = (List<Map<String, Object>>) responseBody.get("choices");
