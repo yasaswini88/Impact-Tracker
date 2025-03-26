@@ -1,7 +1,11 @@
 package com.Impact_Tracker.Impact_Tracker.Entity;
+import java.util.List;
+import com.Impact_Tracker.Impact_Tracker.Entity.Business;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 
 @Entity
 @Table(name = "features")
@@ -16,6 +20,12 @@ public class Feature {
 
     @Column(name = "created_time", nullable = false)
     private LocalDateTime createdTime;
+
+    @ManyToMany(mappedBy = "features")
+    @JsonBackReference
+
+private List<Business> businesses;
+
 
     public Feature() {
         this.createdTime = LocalDateTime.now();
@@ -45,4 +55,16 @@ public class Feature {
     public void setCreatedTime(LocalDateTime createdTime) {
         this.createdTime = createdTime;
     }
+
+    public List<Business> getBusinesses() {
+        return businesses;
+    }
+
+
+    public void setBusinesses(List<Business> businesses) {
+        this.businesses = businesses;
+    }
+
+
+
 }

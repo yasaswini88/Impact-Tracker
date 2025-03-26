@@ -60,42 +60,7 @@ public class OpenAiService {
         }
     }
 
-    // public String analyzeWeeklyTrendData(List<String> lines) {
-    //     if (lines.isEmpty()) {
-    //         return "{\"trend_summary\": \"No data for this period.\"}";
-    //     }
-
-    //     String prompt = "Analyze these phone call reviews with their creation dates. Summarize how sentiment has changed " +
-    //             "or progressed over the past week in 1-2 sentences. " +
-    //             "Return your response in valid JSON with a single field: 'trend_summary'. " +
-    //             "Here is the data:\n" +
-    //             String.join("\n", lines);
-
-    //     Map<String, Object> requestBody = Map.of(
-    //             "model", "gpt-3.5-turbo",
-    //             "messages", List.of(
-    //                     Map.of("role", "system", "content",
-    //                             "You are an AI that analyzes customer reviews and extracts short trend summaries."),
-    //                     Map.of("role", "user", "content", prompt)
-    //             ),
-    //             "temperature", 0.7
-    //     );
-
-    //     HttpHeaders headers = new HttpHeaders();
-    //     headers.setContentType(MediaType.APPLICATION_JSON);
-    //     headers.setBearerAuth(apiKey);
-
-    //     HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
-    //     ResponseEntity<Map> response =
-    //             restTemplate.exchange(OPENAI_URL, HttpMethod.POST, requestEntity, Map.class);
-
-    //     if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-    //         return extractInsights(response.getBody());
-    //     } else {
-    //         return "{\"trend_summary\": \"OpenAI request failed with status: " +
-    //                 response.getStatusCodeValue() + "\"}";
-    //     }
-    // }
+ 
 
     public String analyzeWeeklyTrendData(List<String> lines) {
     if (lines.isEmpty()) {
@@ -198,7 +163,8 @@ public class OpenAiService {
         }
     }
 
-    public String generateSeasonalTrends(String businessType, String googlePlacesLink) {
+    public String generateSeasonalTrends(String businessType, String googlePlacesLink)
+     {
         String prompt = "Provide estimated seasonal demand month-wise for a " + businessType
             + " business located at " + googlePlacesLink + ". "
             + "The demand should be on a percentage scale where 0% is no demand and 100% is the peak demand month. "
@@ -269,6 +235,66 @@ public class OpenAiService {
     } else {
         throw new RuntimeException("OpenAI API failed: " + response.getStatusCodeValue());
     }
+
+
+
 }
+
+public String suggestFeatures(String businessType, String googleInsights, String facebookInsights, String callVolumeSummary, List<String> featureList) {
+     String prompt = String.format(
+        "You are an expert consultant specializing in feature recommendations for businesses.\n\n" +
+        "Given the following data about a '%s' business:\n\n" +
+        "Google Reviews Insights:\n%s\n\n" +
+        "Facebook Reviews Insights:\n%s\n\n" +
+        "Call Volume Analysis:\n%s\n\n" +
+        "Available Features:\n%s\n\n" +
+        "Based on the customer sentiment (positives and negatives), call volume trends, and the overall business context provided, identify and recommend ALL suitable features from the provided feature list that would significantly benefit this business. \n\n" +
+        "Prioritize features that directly address customer concerns mentioned in reviews, resolve pain points related to declining call volumes, or capitalize on strengths. Aim to recommend at least 3 to 5 relevant features if possible. Provide your answer strictly as a JSON array of feature names without any additional text:\n\n" +
+        "[\"Feature Name 1\", \"Feature Name 2\", \"Feature Name 3\", ...]",
+        businessType, googleInsights, facebookInsights, callVolumeSummary, featureList
+    );
+
+
+    System.out.println("---------------------------------------------------------");
+
+    System.out.println("Business Type: " + businessType);   
+    System.out.println("Prompt: " + prompt);
+    // System.out.println(prompt);
+    System.out.println("Feature List: " + featureList);
+    System.out.println("Google Insights: " + googleInsights);
+    System.out.println("Facebook Insights: " + facebookInsights);
+    System.out.println("Call Volume Summary: " + callVolumeSummary);
+
+
+
+    System.out.println("---------------------------------------------------------");
+
+    Map<String, Object> requestBody = Map.of(
+        "model", "gpt-3.5-turbo",
+        "messages", List.of(
+            Map.of("role", "system", "content", "Suggest relevant features based on insights provided."),
+            Map.of("role", "user", "content", prompt)
+        ),
+        "temperature", 0.5
+    );
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setBearerAuth(apiKey);
+
+    ResponseEntity<Map> response = restTemplate.exchange(
+        OPENAI_URL,
+        HttpMethod.POST,
+        new HttpEntity<>(requestBody, headers),
+        Map.class
+    );
+
+    if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+        return extractInsights(response.getBody());
+    } else {
+        throw new RuntimeException("OpenAI API failed: " + response.getStatusCode());
+    }
+}
+
 
 }

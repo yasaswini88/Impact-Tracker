@@ -1,9 +1,14 @@
 package com.Impact_Tracker.Impact_Tracker.Entity;
+import java.util.List;
+import com.Impact_Tracker.Impact_Tracker.Entity.Feature;
+import com.Impact_Tracker.Impact_Tracker.Entity.BusinessSuggestedFeature;
+
 
 import jakarta.persistence.*;
 import java.time.LocalTime;
 import com.Impact_Tracker.Impact_Tracker.Entity.Plans;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 
 @Entity
@@ -70,6 +75,18 @@ private Plans plan;
 
 @Column(nullable = true)
 private LocalDateTime dateOfPlanUpdated;
+
+@ManyToMany
+@JoinTable(
+    name = "business_suggested_features",
+    joinColumns = @JoinColumn(name = "business_id"),
+    inverseJoinColumns = @JoinColumn(name = "feature_id")
+)
+@JsonManagedReference
+private List<Feature> features;
+
+
+
 
 
     // Constructors
@@ -236,6 +253,21 @@ private LocalDateTime dateOfPlanUpdated;
     public void setDateOfPlanUpdated(LocalDateTime dateOfPlanUpdated) {
         this.dateOfPlanUpdated = dateOfPlanUpdated;
     }
+
+
+    public List<Feature> getFeatures() {
+        return features;
+    }
+
+
+    public void setFeatures(List<Feature> features) {
+        this.features = features;
+    }
+
+
+
+
+
 
 
 

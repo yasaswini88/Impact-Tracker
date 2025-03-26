@@ -15,6 +15,15 @@ public class CallVolumeRequest {
     // getters & setters
 
 
+    public CallVolumeRequest(List<Integer> answered, List<Integer> missed, List<Integer> voicemail, List<String> months) {
+    this.answered = answered;
+    this.missed = missed;
+    this.voicemail = voicemail;
+    this.months = months;
+}
+
+
+
 
     public List<Integer> getAnswered() {
         return answered;

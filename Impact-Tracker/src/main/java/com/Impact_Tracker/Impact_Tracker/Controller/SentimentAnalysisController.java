@@ -9,9 +9,14 @@ import com.Impact_Tracker.Impact_Tracker.Repo.BusinessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 
 
 import java.util.List;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/v1/sentiment-analyses")
@@ -81,27 +86,33 @@ public class SentimentAnalysisController {
         return ResponseEntity.ok(summaryJson);
     }
 
-@PostMapping("/call-volume-trend/{businessId}")
-public ResponseEntity<String> getCallVolumeTrend(
-    @PathVariable("businessId") Long bizId,
-    @RequestBody CallVolumeRequest request
-) {
-    // 1) Look up the business by ID
-    Business biz = businessRepository.findById(bizId)
-            .orElseThrow(() -> new RuntimeException(
-                "Business not found with ID: " + bizId));
 
-    // 2) Pass that Business entity along with the call-volume arrays
-    String gptSummaryJson = sentimentAnalysisService.analyzeCallVolumeTrends(
-        request.getAnswered(),
-        request.getMissed(),
-        request.getVoicemail(),
-        request.getMonths(),
-        biz
+@PostMapping("/call-volume-trend/{businessId}")
+public ResponseEntity<Map<String, Object>> getCallVolumeTrend(@PathVariable("businessId") Long bizId) {
+    Business biz = businessRepository.findById(bizId)
+            .orElseThrow(() -> new RuntimeException("Business not found with ID: " + bizId));
+
+    CallVolumeRequest request = SentimentAnalysisService.BUSINESS_CALL_VOLUME_DATA.getOrDefault(
+            bizId,
+            new CallVolumeRequest(
+                    List.of(30, 30, 30, 30, 30, 30, 30),
+                    List.of(10, 10, 10, 10, 10, 10, 10),
+                    List.of(5, 5, 5, 5, 5, 5, 5),
+                    List.of("aug", "sep", "oct", "nov", "dec", "jan", "feb")
+            )
     );
 
-    return ResponseEntity.ok(gptSummaryJson);
+    Map<String, Object> response = sentimentAnalysisService.analyzeCallVolumeTrends(
+            request.getAnswered(),
+            request.getMissed(),
+            request.getVoicemail(),
+            request.getMonths(),
+            biz
+    );
+
+    return ResponseEntity.ok(response);
 }
+
 
 
     // UPDATE

@@ -12,6 +12,12 @@ import com.Impact_Tracker.Impact_Tracker.Service.OpenAiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+import com.Impact_Tracker.Impact_Tracker.DTO.CallVolumeRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -176,21 +182,56 @@ public String analyzeWeeklyTrend(Long businessId) {
     }
 
 
-public String analyzeCallVolumeTrends(
-    List<Integer> answered,
-    List<Integer> missed,
-    List<Integer> voicemail,
-    List<String> months,
-    Business biz
+public Map<String, Object> analyzeCallVolumeTrends(
+        List<Integer> answered,
+        List<Integer> missed,
+        List<Integer> voicemail,
+        List<String> months,
+        Business biz
 ) {
-    // We'll pass businessType and address to the OpenAiService method:
     String businessType = biz.getBusinessType();
-    String address = biz.getAddress(); 
+    String address = biz.getAddress();
 
-    return openAiService.analyzeCallVolumeData(
-        answered, missed, voicemail, months, businessType, address
+    String summaryJson = openAiService.analyzeCallVolumeData(
+            answered, missed, voicemail, months, businessType, address
+    );
+
+    // Convert the OpenAI response (JSON String) into a Java Map
+    ObjectMapper mapper = new ObjectMapper();
+    Map<String, Object> summaryMap;
+    try {
+        summaryMap = mapper.readValue(summaryJson, Map.class);
+    } catch (Exception e) {
+        summaryMap = Map.of("call_volume_summary", "Failed to parse AI summary.");
+    }
+
+    // Include call volume data in the response
+    return Map.of(
+            "answered", answered,
+            "missed", missed,
+            "voicemail", voicemail,
+            "months", months,
+            "call_volume_summary", summaryMap.get("call_volume_summary")
     );
 }
+
+
+public static final Map<Long, CallVolumeRequest> BUSINESS_CALL_VOLUME_DATA = Map.of(
+    1L, new CallVolumeRequest(
+        List.of(42, 109, 100, 40, 31, 28, 14),
+        List.of(11, 34, 52, 45, 30, 32, 20),
+        List.of(11, 32, 52, 41, 28, 32, 20),
+        List.of("aug", "sep", "oct", "nov", "dec", "jan", "feb")
+    ),
+    3L, new CallVolumeRequest(
+        List.of(50, 90, 85, 60, 90, 95, 100),
+        List.of(10, 20, 30, 20, 15, 10, 5),
+        List.of(5, 10, 15, 20, 25, 15, 10),
+        List.of("aug", "sep", "oct", "nov", "dec", "jan", "feb")
+    )
+   
+);
+
 
   
     private SentimentAnalysisDto mapToDto(SentimentAnalysis sa) {
