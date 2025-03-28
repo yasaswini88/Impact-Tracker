@@ -1,6 +1,6 @@
 package com.Impact_Tracker.Impact_Tracker.Entity;
 import java.util.List;
-import com.Impact_Tracker.Impact_Tracker.Entity.Business;
+// import com.Impact_Tracker.Impact_Tracker.Entity.Business;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

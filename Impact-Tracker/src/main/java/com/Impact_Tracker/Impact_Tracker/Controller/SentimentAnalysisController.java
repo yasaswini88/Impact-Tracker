@@ -9,14 +9,10 @@ import com.Impact_Tracker.Impact_Tracker.Repo.BusinessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-
-
+// import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
-
 
 @RestController
 @RequestMapping("/api/v1/sentiment-analyses")
@@ -27,8 +23,6 @@ public class SentimentAnalysisController {
 
     @Autowired
     private BusinessRepository businessRepository;
-
-
 
     // CREATE
     @PostMapping
@@ -51,27 +45,26 @@ public class SentimentAnalysisController {
         return ResponseEntity.ok(list);
     }
 
-
-// READ by sentiment
+    // READ by sentiment
     @GetMapping("/by-sentiment/{sentimentValue}")
-    public ResponseEntity<List<SentimentAnalysisDto>> getBySentiment(@PathVariable("sentimentValue") String sentimentValue) {
+    public ResponseEntity<List<SentimentAnalysisDto>> getBySentiment(
+            @PathVariable("sentimentValue") String sentimentValue) {
         List<SentimentAnalysisDto> list = sentimentAnalysisService.getSentimentAnalysesBySentiment(sentimentValue);
         return ResponseEntity.ok(list);
     }
 
-
-     @GetMapping("/by-sentiment/{businessId}/{sentimentValue}")
+    @GetMapping("/by-sentiment/{businessId}/{sentimentValue}")
     public ResponseEntity<List<SentimentAnalysisDto>> getByBusinessAndSentiment(
             @PathVariable("businessId") Long businessId,
             @PathVariable("sentimentValue") String sentimentValue) {
 
-        List<SentimentAnalysisDto> results =
-                sentimentAnalysisService.getByBusinessIdAndSentiment(businessId, sentimentValue);
+        List<SentimentAnalysisDto> results = sentimentAnalysisService.getByBusinessIdAndSentiment(businessId,
+                sentimentValue);
 
         return ResponseEntity.ok(results);
     }
 
-        @GetMapping("/weekly-stats/{businessId}")
+    @GetMapping("/weekly-stats/{businessId}")
     public ResponseEntity<WeeklySentimentStatsDto> getWeeklyStats(
             @PathVariable("businessId") Long businessId) {
 
@@ -79,46 +72,52 @@ public class SentimentAnalysisController {
         return ResponseEntity.ok(stats);
     }
 
-
-@GetMapping("/weekly-trend/{businessId}")
+    @GetMapping("/weekly-trend/{businessId}")
     public ResponseEntity<String> getWeeklyTrendSummary(@PathVariable Long businessId) {
         String summaryJson = sentimentAnalysisService.analyzeWeeklyTrend(businessId);
         return ResponseEntity.ok(summaryJson);
     }
 
+    // @PostMapping("/call-volume-trend/{businessId}")
+    // public ResponseEntity<Map<String, Object>>
+    // getCallVolumeTrend(@PathVariable("businessId") Long bizId) {
+    // Business biz = businessRepository.findById(bizId)
+    // .orElseThrow(() -> new RuntimeException("Business not found with ID: " +
+    // bizId));
 
-@PostMapping("/call-volume-trend/{businessId}")
-public ResponseEntity<Map<String, Object>> getCallVolumeTrend(@PathVariable("businessId") Long bizId) {
-    Business biz = businessRepository.findById(bizId)
-            .orElseThrow(() -> new RuntimeException("Business not found with ID: " + bizId));
+    // CallVolumeRequest request =
+    // SentimentAnalysisService.BUSINESS_CALL_VOLUME_DATA.getOrDefault(
+    // bizId,
+    // new CallVolumeRequest(
+    // List.of(30, 30, 30, 30, 30, 30, 30),
+    // List.of(10, 10, 10, 10, 10, 10, 10),
+    // List.of(5, 5, 5, 5, 5, 5, 5),
+    // List.of("aug", "sep", "oct", "nov", "dec", "jan", "feb")
+    // )
+    // );
 
-    CallVolumeRequest request = SentimentAnalysisService.BUSINESS_CALL_VOLUME_DATA.getOrDefault(
-            bizId,
-            new CallVolumeRequest(
-                    List.of(30, 30, 30, 30, 30, 30, 30),
-                    List.of(10, 10, 10, 10, 10, 10, 10),
-                    List.of(5, 5, 5, 5, 5, 5, 5),
-                    List.of("aug", "sep", "oct", "nov", "dec", "jan", "feb")
-            )
-    );
+    // Map<String, Object> response =
+    // sentimentAnalysisService.analyzeCallVolumeTrends(
+    // request.getAnswered(),
+    // request.getMissed(),
+    // request.getVoicemail(),
+    // request.getMonths(),
+    // biz
+    // );
 
-    Map<String, Object> response = sentimentAnalysisService.analyzeCallVolumeTrends(
-            request.getAnswered(),
-            request.getMissed(),
-            request.getVoicemail(),
-            request.getMonths(),
-            biz
-    );
+    // return ResponseEntity.ok(response);
+    // }
 
-    return ResponseEntity.ok(response);
-}
-
-
+    @GetMapping("/call-volume-trend/{businessId}")
+    public ResponseEntity<Map<String, Object>> getCallVolumeTrend(@PathVariable("businessId") Long businessId) {
+        Map<String, Object> response = sentimentAnalysisService.analyzeCallVolumeTrendsForBusiness(businessId);
+        return ResponseEntity.ok(response);
+    }
 
     // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<SentimentAnalysisDto> update(@PathVariable Long id,
-                                                       @RequestBody SentimentAnalysisDto dto) {
+            @RequestBody SentimentAnalysisDto dto) {
         SentimentAnalysisDto updated = sentimentAnalysisService.updateSentimentAnalysis(id, dto);
         return ResponseEntity.ok(updated);
     }

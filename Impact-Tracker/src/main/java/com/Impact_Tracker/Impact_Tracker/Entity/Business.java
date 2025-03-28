@@ -1,12 +1,12 @@
 package com.Impact_Tracker.Impact_Tracker.Entity;
 import java.util.List;
-import com.Impact_Tracker.Impact_Tracker.Entity.Feature;
-import com.Impact_Tracker.Impact_Tracker.Entity.BusinessSuggestedFeature;
+// import com.Impact_Tracker.Impact_Tracker.Entity.Feature;
+// import com.Impact_Tracker.Impact_Tracker.Entity.BusinessSuggestedFeature;
 
 
 import jakarta.persistence.*;
 import java.time.LocalTime;
-import com.Impact_Tracker.Impact_Tracker.Entity.Plans;
+// import com.Impact_Tracker.Impact_Tracker.Entity.Plans;
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 

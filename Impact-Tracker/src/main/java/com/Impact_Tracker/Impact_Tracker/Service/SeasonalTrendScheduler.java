@@ -1,10 +1,10 @@
-package com.Impact_Tracker.Impact_Tracker.Scheduler;
+package com.Impact_Tracker.Impact_Tracker.Service;
 
 import com.Impact_Tracker.Impact_Tracker.Entity.Business;
 import com.Impact_Tracker.Impact_Tracker.Entity.SeasonalTrend;
 import com.Impact_Tracker.Impact_Tracker.Repo.BusinessRepository;
 import com.Impact_Tracker.Impact_Tracker.Repo.SeasonalTrendRepository;
-import com.Impact_Tracker.Impact_Tracker.Service.OpenAiService;
+// import com.Impact_Tracker.Impact_Tracker.Service.OpenAiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

@@ -33,6 +33,7 @@ public class WeatherForecastService {
  
     // @Scheduled(cron="0 1 1 * * *")
     // @Scheduled(cron="0 1 1 * * *")
+    @Scheduled(cron = "0 0/1 * * * ?")  // Run every 2 minutes for testing
     public void fetchAndStoreForecast() {
         // 1) Call the API
         Map<String, Object> responseMap = restTemplate.getForObject(WEATHER_API_URL, Map.class);

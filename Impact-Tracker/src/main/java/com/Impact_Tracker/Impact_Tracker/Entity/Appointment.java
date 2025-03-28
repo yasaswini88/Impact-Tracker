@@ -1,7 +1,7 @@
 package com.Impact_Tracker.Impact_Tracker.Entity;
 
 import jakarta.persistence.*;
-import java.time.LocalTime;
+// import java.time.LocalTime;
 
 @Entity
 @Table(name = "appointment")

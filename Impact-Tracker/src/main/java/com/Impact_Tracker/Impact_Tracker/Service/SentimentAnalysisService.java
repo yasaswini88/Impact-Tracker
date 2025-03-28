@@ -5,18 +5,21 @@ import com.Impact_Tracker.Impact_Tracker.DTO.WeeklySentimentStatsDto;
 import com.Impact_Tracker.Impact_Tracker.Entity.SentimentAnalysis;
 import java.time.LocalDateTime;
 import com.Impact_Tracker.Impact_Tracker.Entity.Business;
-import com.Impact_Tracker.Impact_Tracker.Entity.SentimentAnalysis;
+// import com.Impact_Tracker.Impact_Tracker.Entity.SentimentAnalysis;
 import com.Impact_Tracker.Impact_Tracker.Repo.BusinessRepository;
 import com.Impact_Tracker.Impact_Tracker.Repo.SentimentAnalysisRepository;
-import com.Impact_Tracker.Impact_Tracker.Service.OpenAiService;
+// import com.Impact_Tracker.Impact_Tracker.Service.OpenAiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.Impact_Tracker.Impact_Tracker.Service.OpenAiService;
+import com.Impact_Tracker.Impact_Tracker.Service.CallVolumeService;
+import com.Impact_Tracker.Impact_Tracker.DTO.CallVolumeDto;
+import java.util.Comparator;
+
 
 import java.util.Map;
 import com.Impact_Tracker.Impact_Tracker.DTO.CallVolumeRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +35,9 @@ public class SentimentAnalysisService {
 
     @Autowired
     private BusinessRepository businessRepository;
+
+    @Autowired
+private CallVolumeService callVolumeService;
 
     // CREATE
     public SentimentAnalysisDto createSentimentAnalysis(SentimentAnalysisDto dto) {
@@ -65,21 +71,20 @@ public class SentimentAnalysisService {
                 .collect(Collectors.toList());
     }
 
-
     public List<SentimentAnalysisDto> getByBusinessIdAndSentiment(Long businessId, String sentimentValue) {
-        List<SentimentAnalysis> entities =
-                sentimentAnalysisRepository.findByBusiness_BusinessIdAndSentiment(businessId, sentimentValue);
+        List<SentimentAnalysis> entities = sentimentAnalysisRepository.findByBusiness_BusinessIdAndSentiment(businessId,
+                sentimentValue);
 
         // Map each entity to DTO
         return entities.stream()
-                       .map(this::mapToDto)
-                       .collect(Collectors.toList());
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     public List<SentimentAnalysisDto> getSentimentAnalysesBySentiment(String sentiment) {
         // Use the custom repository method
         List<SentimentAnalysis> entities = sentimentAnalysisRepository.findBySentiment(sentiment);
-        
+
         // Map each entity to DTO
         return entities.stream()
                 .map(this::mapToDto)
@@ -106,14 +111,11 @@ public class SentimentAnalysisService {
         existing.setAiHandled(dto.getAiHandled());
         existing.setUpdatedAt(dto.getUpdatedAt());
 
-
-
         SentimentAnalysis saved = sentimentAnalysisRepository.save(existing);
         return mapToDto(saved);
     }
 
-
-     public WeeklySentimentStatsDto getWeeklyStatsForBusiness(Long businessId) {
+    public WeeklySentimentStatsDto getWeeklyStatsForBusiness(Long businessId) {
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
 
         // 1) Query only last 7 days
@@ -143,13 +145,11 @@ public class SentimentAnalysisService {
         return new WeeklySentimentStatsDto(negativePct, positivePct);
     }
 
-
-public String analyzeWeeklyTrend(Long businessId) {
+    public String analyzeWeeklyTrend(Long businessId) {
         // 1) Get the time range: last 7 days
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime oneWeekAgo = now.minusDays(7);
 
-      
         List<SentimentAnalysis> lastWeekAnalyses = sentimentAnalysisRepository.findAll()
                 .stream()
                 .filter(sa -> sa.getBusiness().getBusinessId().equals(businessId))
@@ -159,19 +159,16 @@ public String analyzeWeeklyTrend(Long businessId) {
                 })
                 .toList();
 
-       
-     List<String> lines = lastWeekAnalyses.stream()
-    .map(sa -> "Date: " + sa.getGeneratedAt() 
-            + ", Sentiment: " + sa.getSentiment())
-    .collect(Collectors.toList());
-
+        List<String> lines = lastWeekAnalyses.stream()
+                .map(sa -> "Date: " + sa.getGeneratedAt()
+                        + ", Sentiment: " + sa.getSentiment())
+                .collect(Collectors.toList());
 
         // 4) Call your new OpenAI method
         String summaryJson = openAiService.analyzeWeeklyTrendData(lines);
 
         return summaryJson;
     }
-
 
     // DELETE
     public void deleteSentimentAnalysis(Long id) {
@@ -181,59 +178,72 @@ public String analyzeWeeklyTrend(Long businessId) {
         sentimentAnalysisRepository.deleteById(id);
     }
 
+    public Map<String, Object> analyzeCallVolumeTrends(
+            List<Integer> answered,
+            List<Integer> missed,
+            List<Integer> voicemail,
+            List<String> months,
+            Business biz) {
+        String businessType = biz.getBusinessType();
+        String address = biz.getAddress();
 
-public Map<String, Object> analyzeCallVolumeTrends(
-        List<Integer> answered,
-        List<Integer> missed,
-        List<Integer> voicemail,
-        List<String> months,
-        Business biz
-) {
-    String businessType = biz.getBusinessType();
-    String address = biz.getAddress();
+        String summaryJson = openAiService.analyzeCallVolumeData(
+                answered, missed, voicemail, months, businessType, address);
 
-    String summaryJson = openAiService.analyzeCallVolumeData(
-            answered, missed, voicemail, months, businessType, address
-    );
+        // Convert the OpenAI response (JSON String) into a Java Map
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> summaryMap;
+        try {
+            summaryMap = mapper.readValue(summaryJson, Map.class);
+        } catch (Exception e) {
+            summaryMap = Map.of("call_volume_summary", "Failed to parse AI summary.");
+        }
 
-    // Convert the OpenAI response (JSON String) into a Java Map
-    ObjectMapper mapper = new ObjectMapper();
-    Map<String, Object> summaryMap;
-    try {
-        summaryMap = mapper.readValue(summaryJson, Map.class);
-    } catch (Exception e) {
-        summaryMap = Map.of("call_volume_summary", "Failed to parse AI summary.");
+        // Include call volume data in the response
+        return Map.of(
+                "answered", answered,
+                "missed", missed,
+                "voicemail", voicemail,
+                "months", months,
+                "call_volume_summary", summaryMap.get("call_volume_summary"));
     }
 
-    // Include call volume data in the response
-    return Map.of(
-            "answered", answered,
-            "missed", missed,
-            "voicemail", voicemail,
-            "months", months,
-            "call_volume_summary", summaryMap.get("call_volume_summary")
-    );
-}
+    public Map<String, Object> analyzeCallVolumeTrendsForBusiness(Long businessId) {
+        // 1. Retrieve the business entity
+        Business biz = businessRepository.findById(businessId)
+                .orElseThrow(() -> new RuntimeException("Business not found with ID: " + businessId));
+    
+        // 2. Retrieve call volume records from the DB using CallVolumeService
+        List<CallVolumeDto> callVolumes = callVolumeService.getCallVolumesByBusinessId(businessId);
+        if (callVolumes.isEmpty()) {
+            throw new RuntimeException("No call volume data found for business ID: " + businessId);
+        }
+        
+        // 3. Choose the latest record (or apply your desired aggregation)
+        CallVolumeDto latest = callVolumes.stream()
+                .max(Comparator.comparing(CallVolumeDto::getDateCreated))
+                .orElse(callVolumes.get(0));
+        
+        // 4. Call OpenAiService to analyze call volume data using the values from DB
+        String summaryJson = openAiService.analyzeCallVolumeData(
+                latest.getAnswered(),
+                latest.getMissed(),
+                latest.getVoicemail(),
+                latest.getMonths(),
+                biz.getBusinessType(),
+                biz.getAddress()
+        );
+        
+        // 5. Return a combined response with the original data and the AI-generated summary
+        return Map.of(
+                "answered", latest.getAnswered(),
+                "missed", latest.getMissed(),
+                "voicemail", latest.getVoicemail(),
+                "months", latest.getMonths(),
+                "call_volume_summary", summaryJson
+        );
+    }
 
-
-public static final Map<Long, CallVolumeRequest> BUSINESS_CALL_VOLUME_DATA = Map.of(
-    1L, new CallVolumeRequest(
-        List.of(42, 109, 100, 40, 31, 28, 14),
-        List.of(11, 34, 52, 45, 30, 32, 20),
-        List.of(11, 32, 52, 41, 28, 32, 20),
-        List.of("aug", "sep", "oct", "nov", "dec", "jan", "feb")
-    ),
-    3L, new CallVolumeRequest(
-        List.of(50, 90, 85, 60, 90, 95, 100),
-        List.of(10, 20, 30, 20, 15, 10, 5),
-        List.of(5, 10, 15, 20, 25, 15, 10),
-        List.of("aug", "sep", "oct", "nov", "dec", "jan", "feb")
-    )
-   
-);
-
-
-  
     private SentimentAnalysisDto mapToDto(SentimentAnalysis sa) {
         SentimentAnalysisDto dto = new SentimentAnalysisDto();
         dto.setId(sa.getId());
@@ -251,14 +261,13 @@ public static final Map<Long, CallVolumeRequest> BUSINESS_CALL_VOLUME_DATA = Map
 
     private SentimentAnalysis mapToEntity(SentimentAnalysisDto dto) {
         SentimentAnalysis sa = new SentimentAnalysis();
-       
+
         sa.setClientPhoneNumber(dto.getClientPhoneNumber());
         sa.setSentiment(dto.getSentiment());
         sa.setText(dto.getText());
         sa.setAudioUrl(dto.getAudioUrl());
-        
+
         return sa;
     }
-
 
 }

@@ -33,7 +33,7 @@ public class AIWeatherService {
     /**
      * Runs every 3 minutes to handle new forecasts that the "AI" has not processed yet.
      */
-    @Scheduled(cron = "0 0/1 * * * ?")
+    // @Scheduled(cron = "0 0/1 * * * ?")
     // @Scheduled(cron="0 1 1 * * *")
     public void checkAndHandleForecasts() {
         // 1) Get all forecasts
