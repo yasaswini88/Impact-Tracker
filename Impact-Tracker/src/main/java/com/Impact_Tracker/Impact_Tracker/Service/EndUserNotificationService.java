@@ -24,8 +24,7 @@ public class EndUserNotificationService {
     @Autowired
     private WeatherForecastRepository wfRepository;
 
-    @Autowired
-    private CustomerRepository customerRepository;
+ 
 
     @Autowired
     private EndUserConfirmationRepository endUserConfirmationRepository;
@@ -47,7 +46,7 @@ public class EndUserNotificationService {
      *  - Looks for businessConfirmed='Y' and status='RESPONDED' (meaning the business said "Yes")
      *  - Sends emails to customers, sets BWN status to EMAIL_HANDLED (not fully Handled yet).
      */
-    @Scheduled(cron = "0 0/1 * * * ?")
+    // @Scheduled(cron = "0 0/1 * * * ?")
     // @Scheduled(cron = "0 1 1 * * *")
     public void sendEmailNotificationsToEndUsers() {
         // 1) Find BWN records with business_confirmed='Y' and status='RESPONDED'

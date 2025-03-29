@@ -10,4 +10,5 @@ import java.util.List;
 public interface CallVolumeRepository extends JpaRepository<CallVolume, Long> {
     // Find call volume records by business id
     List<CallVolume> findByBusiness_BusinessId(Long businessId);
+    List<CallVolume> findAll();
 }

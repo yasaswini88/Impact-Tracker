@@ -4,6 +4,7 @@ import com.Impact_Tracker.Impact_Tracker.DTO.SentimentAnalysisDto;
 import com.Impact_Tracker.Impact_Tracker.DTO.WeeklySentimentStatsDto;
 import com.Impact_Tracker.Impact_Tracker.DTO.CallVolumeRequest;
 import com.Impact_Tracker.Impact_Tracker.Service.SentimentAnalysisService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.Impact_Tracker.Impact_Tracker.Entity.Business;
 import com.Impact_Tracker.Impact_Tracker.Repo.BusinessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,40 +74,17 @@ public class SentimentAnalysisController {
     }
 
     @GetMapping("/weekly-trend/{businessId}")
-    public ResponseEntity<String> getWeeklyTrendSummary(@PathVariable Long businessId) {
+    public ResponseEntity<Map<String, Object>> getWeeklyTrendSummary(@PathVariable Long businessId) {
         String summaryJson = sentimentAnalysisService.analyzeWeeklyTrend(businessId);
-        return ResponseEntity.ok(summaryJson);
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> summaryMap;
+        try {
+            summaryMap = mapper.readValue(summaryJson, Map.class);
+        } catch (Exception e) {
+            summaryMap = Map.of("trend_summary", "Parsing error", "overall_sentiment", "Neutral");
+        }
+        return ResponseEntity.ok(summaryMap);
     }
-
-    // @PostMapping("/call-volume-trend/{businessId}")
-    // public ResponseEntity<Map<String, Object>>
-    // getCallVolumeTrend(@PathVariable("businessId") Long bizId) {
-    // Business biz = businessRepository.findById(bizId)
-    // .orElseThrow(() -> new RuntimeException("Business not found with ID: " +
-    // bizId));
-
-    // CallVolumeRequest request =
-    // SentimentAnalysisService.BUSINESS_CALL_VOLUME_DATA.getOrDefault(
-    // bizId,
-    // new CallVolumeRequest(
-    // List.of(30, 30, 30, 30, 30, 30, 30),
-    // List.of(10, 10, 10, 10, 10, 10, 10),
-    // List.of(5, 5, 5, 5, 5, 5, 5),
-    // List.of("aug", "sep", "oct", "nov", "dec", "jan", "feb")
-    // )
-    // );
-
-    // Map<String, Object> response =
-    // sentimentAnalysisService.analyzeCallVolumeTrends(
-    // request.getAnswered(),
-    // request.getMissed(),
-    // request.getVoicemail(),
-    // request.getMonths(),
-    // biz
-    // );
-
-    // return ResponseEntity.ok(response);
-    // }
 
     @GetMapping("/call-volume-trend/{businessId}")
     public ResponseEntity<Map<String, Object>> getCallVolumeTrend(@PathVariable("businessId") Long businessId) {

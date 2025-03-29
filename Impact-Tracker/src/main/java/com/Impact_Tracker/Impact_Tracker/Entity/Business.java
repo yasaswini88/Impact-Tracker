@@ -1,15 +1,14 @@
 package com.Impact_Tracker.Impact_Tracker.Entity;
+
 import java.util.List;
 // import com.Impact_Tracker.Impact_Tracker.Entity.Feature;
 // import com.Impact_Tracker.Impact_Tracker.Entity.BusinessSuggestedFeature;
-
 
 import jakarta.persistence.*;
 import java.time.LocalTime;
 // import com.Impact_Tracker.Impact_Tracker.Entity.Plans;
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 
 @Entity
 @Table(name = "business")
@@ -35,59 +34,44 @@ public class Business {
     private String email;
     private String zipCode;
 
-     @Column(nullable = true)
+    @Column(nullable = true)
     private Double longitude;
 
     @Column(nullable = true)
     private Double latitude;
 
-    @Column(nullable = false)  
+    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = true)  
-private String businessType;
+    @Column(nullable = true)
+    private String businessType;
 
-@Column(nullable = true) 
-private String businessSize = "small";  
+    @Column(nullable = true)
+    private String businessSize = "small";
 
-
-
-
-
-@Column(nullable = true)
+    @Column(nullable = true)
     private String address;
 
-    @Column(nullable = true,length=500)
-    private String googlePlacesLink; 
+    @Column(nullable = true, length = 500)
+    private String googlePlacesLink;
 
+    // @Column(nullable = true)
+    // private Integer ageOfAccount;
 
-//     @Column(nullable = true)
-// private Integer ageOfAccount;
+    @Column(nullable = true)
+    private LocalDateTime createdDate = LocalDateTime.now();
 
+    @ManyToOne
+    @JoinColumn(name = "plan_id")
+    private Plans plan;
 
-@Column(nullable = true)
-private LocalDateTime createdDate = LocalDateTime.now();
+    @Column(nullable = true)
+    private LocalDateTime dateOfPlanUpdated;
 
-
-@ManyToOne
-@JoinColumn(name = "plan_id")
-private Plans plan;
-
-@Column(nullable = true)
-private LocalDateTime dateOfPlanUpdated;
-
-@ManyToMany
-@JoinTable(
-    name = "business_suggested_features",
-    joinColumns = @JoinColumn(name = "business_id"),
-    inverseJoinColumns = @JoinColumn(name = "feature_id")
-)
-@JsonManagedReference
-private List<Feature> features;
-
-
-
-
+    @ManyToMany
+    @JoinTable(name = "business_suggested_features", joinColumns = @JoinColumn(name = "business_id"), inverseJoinColumns = @JoinColumn(name = "feature_id"))
+    @JsonManagedReference
+    private List<Feature> features;
 
     // Constructors
     public Business() {
@@ -174,7 +158,6 @@ private List<Feature> features;
         this.latitude = latitude;
     }
 
-
     public String getPassword() {
         return password;
     }
@@ -182,7 +165,6 @@ private List<Feature> features;
     public void setPassword(String password) {
         this.password = password;
     }
-
 
     public String getBusinessType() {
         return businessType;
@@ -200,7 +182,7 @@ private List<Feature> features;
         this.businessSize = businessSize;
     }
 
-     public String getAddress() {
+    public String getAddress() {
         return address;
     }
 
@@ -216,31 +198,25 @@ private List<Feature> features;
         this.googlePlacesLink = googlePlacesLink;
     }
 
-
     // public Integer getAgeOfAccount() {
-    //     return ageOfAccount;
+    // return ageOfAccount;
     // }
 
     // public void setAgeOfAccount(Integer ageOfAccount) {
-    //     this.ageOfAccount = ageOfAccount;
+    // this.ageOfAccount = ageOfAccount;
     // }
 
     public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
-
     public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
     }
 
-
-
-
     public Plans getPlan() {
         return plan;
     }
-
 
     public void setPlan(Plans plan) {
         this.plan = plan;
@@ -254,23 +230,12 @@ private List<Feature> features;
         this.dateOfPlanUpdated = dateOfPlanUpdated;
     }
 
-
     public List<Feature> getFeatures() {
         return features;
     }
-
 
     public void setFeatures(List<Feature> features) {
         this.features = features;
     }
 
-
-
-
-
-
-
-
-
-    
 }

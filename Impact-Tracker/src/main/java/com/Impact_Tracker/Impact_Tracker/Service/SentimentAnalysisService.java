@@ -209,41 +209,34 @@ private CallVolumeService callVolumeService;
     }
 
     public Map<String, Object> analyzeCallVolumeTrendsForBusiness(Long businessId) {
-        // 1. Retrieve the business entity
         Business biz = businessRepository.findById(businessId)
                 .orElseThrow(() -> new RuntimeException("Business not found with ID: " + businessId));
     
-        // 2. Retrieve call volume records from the DB using CallVolumeService
         List<CallVolumeDto> callVolumes = callVolumeService.getCallVolumesByBusinessId(businessId);
         if (callVolumes.isEmpty()) {
             throw new RuntimeException("No call volume data found for business ID: " + businessId);
         }
-        
-        // 3. Choose the latest record (or apply your desired aggregation)
+    
         CallVolumeDto latest = callVolumes.stream()
                 .max(Comparator.comparing(CallVolumeDto::getDateCreated))
                 .orElse(callVolumes.get(0));
-        
-        // 4. Call OpenAiService to analyze call volume data using the values from DB
+    
+        // NEW: Only pass answered + months + businessType + address
         String summaryJson = openAiService.analyzeCallVolumeData(
                 latest.getAnswered(),
-                latest.getMissed(),
-                latest.getVoicemail(),
                 latest.getMonths(),
                 biz.getBusinessType(),
                 biz.getAddress()
         );
-        
-        // 5. Return a combined response with the original data and the AI-generated summary
+    
+        // Return minimal data or as much as you want
         return Map.of(
                 "answered", latest.getAnswered(),
-                "missed", latest.getMissed(),
-                "voicemail", latest.getVoicemail(),
                 "months", latest.getMonths(),
                 "call_volume_summary", summaryJson
         );
     }
-
+    
     private SentimentAnalysisDto mapToDto(SentimentAnalysis sa) {
         SentimentAnalysisDto dto = new SentimentAnalysisDto();
         dto.setId(sa.getId());

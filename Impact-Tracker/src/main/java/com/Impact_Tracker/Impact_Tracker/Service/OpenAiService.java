@@ -119,24 +119,22 @@ public class OpenAiService {
     }
 
     public String analyzeCallVolumeData(
-            List<Integer> answered,
-            List<Integer> missed,
-            List<Integer> voicemail,
-            List<String> months,
-            String businessType,
-            String address
+        List<Integer> answered,
+        List<String> months,
+        String businessType,
+        String address
     ) {
         String prompt = "Assuming call volume is proportional to sales, Analyze the monthly call volume data for a "
-                + (businessType != null ? businessType : "business")
-                + " located at " + (address != null ? address : "Unknown Address") + ". "
-                + "We have call counts for last 7 months. "
-                + "Please return a SHORT summary of down trend in the sales for  business  "
-                + "and also mention whether these trends are affecting this business. "
-                + "Respond ONLY in valid JSON with one field 'call_volume_summary'.\n\n";
-
+            + (businessType != null ? businessType : "business")
+            + " located at " + (address != null ? address : "Unknown Address") + ". "
+            + "We have call counts for last " + months.size() + " months. "
+            + "Please return a SHORT summary of the sales trend based only on answered calls. "
+            + "Respond ONLY in valid JSON with one field 'call_volume_summary'.\n\n";
+    
+        // Only mention answered calls in the loop
         for (int i = 0; i < months.size(); i++) {
-            prompt += String.format("Month: %s, Answered: %d \n",
-                    months.get(i), answered.get(i));
+            prompt += String.format("Month: %s, Answered: %d\n",
+                                    months.get(i), answered.get(i));
         }
 
         Map<String, Object> requestBody = Map.of(
@@ -162,6 +160,60 @@ public class OpenAiService {
             return "{\"call_volume_summary\": \"OpenAI request failed.\"}";
         }
     }
+
+
+    public String analyzeCallVolumeData(
+            List<Integer> answered,
+            List<Integer> missed,
+            List<Integer> voicemail,
+            List<String> months,
+            String businessType,
+            String address
+    ) {
+        // Construct your prompt referencing answered, missed, and voicemail
+        String prompt = "Assuming call volume is proportional to sales, " +
+                "Analyze the monthly call volume data for a " +
+                (businessType != null ? businessType : "business") +
+                " located at " + (address != null ? address : "Unknown Address") + ". " +
+                "We have call counts for the last " + months.size() + " months. " +
+                "Please provide a short summary of the sales trend based on answered, missed, " +
+                "and voicemail calls. " +
+                "Respond ONLY in valid JSON with one field 'call_volume_summary'.\n\n";
+
+        for (int i = 0; i < months.size(); i++) {
+            prompt += String.format(
+                "Month: %s, Answered: %d, Missed: %d, Voicemail: %d\n",
+                months.get(i),
+                answered.get(i),
+                missed.get(i),
+                voicemail.get(i)
+            );
+        }
+
+        Map<String, Object> requestBody = Map.of(
+                "model", "gpt-3.5-turbo",
+                "messages", List.of(
+                        Map.of("role", "system", "content", "You are an AI that summarizes call volume data."),
+                        Map.of("role", "user", "content", prompt)
+                ),
+                "temperature", 0.7
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(apiKey);
+
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<Map> response =
+                restTemplate.exchange(OPENAI_URL, HttpMethod.POST, requestEntity, Map.class);
+
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            return extractInsights(response.getBody());
+        } else {
+            return "{\"call_volume_summary\": \"OpenAI request failed.\"}";
+        }
+    }
+
 
     public String generateSeasonalTrends(String businessType, String googlePlacesLink)
      {

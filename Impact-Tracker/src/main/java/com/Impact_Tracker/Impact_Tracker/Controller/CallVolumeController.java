@@ -29,5 +29,26 @@ public class CallVolumeController {
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("/business")
+public ResponseEntity<List<CallVolumeDto>> getAllCallVolumes() {
+    List<CallVolumeDto> callVolumes = callVolumeService.getAllCallVolumes();
+    return ResponseEntity.ok(callVolumes);
+}
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CallVolumeDto> updateCallVolume(@PathVariable Long id, @RequestBody CallVolumeDto dto) {
+        // Call the service layer
+        CallVolumeDto updated = callVolumeService.updateCallVolume(id, dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCallVolume(@PathVariable Long id) {
+        callVolumeService.deleteCallVolume(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Additional methods for other CRUD operations can be added similarly
 
 }

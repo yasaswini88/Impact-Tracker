@@ -40,6 +40,41 @@ public class CallVolumeService {
 
     // Update, Delete methods can be added similarly
 
+    public CallVolumeDto updateCallVolume(Long id, CallVolumeDto dto) {
+        // 1) Find existing record
+        CallVolume existing = callVolumeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("CallVolume not found with ID: " + id));
+    
+        // 2) Optionally update the associated Business if the DTO’s businessId is different
+        if (!existing.getBusiness().getBusinessId().equals(dto.getBusinessId())) {
+            Business business = businessRepository.findById(dto.getBusinessId())
+                    .orElseThrow(() -> new RuntimeException("Business not found with ID: " + dto.getBusinessId()));
+            existing.setBusiness(business);
+        }
+    
+        // 3) Update the lists (months, answered, missed, voicemail)
+        existing.setMonths(dto.getMonths());
+        existing.setAnswered(dto.getAnswered());
+        existing.setMissed(dto.getMissed());
+        existing.setVoicemail(dto.getVoicemail());
+        // typically you do NOT overwrite dateCreated on update
+    
+        // 4) Save and return the updated record
+        CallVolume saved = callVolumeRepository.save(existing);
+        return mapToDto(saved);
+    }
+    public void deleteCallVolume(Long id) {
+        CallVolume existing = callVolumeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("CallVolume not found with ID: " + id));
+        callVolumeRepository.delete(existing);
+    } 
+    
+    public List<CallVolumeDto> getAllCallVolumes() {
+        List<CallVolume> volumes = callVolumeRepository.findAll();
+        return volumes.stream().map(this::mapToDto).collect(Collectors.toList());
+    }
+    
+
     private CallVolumeDto mapToDto(CallVolume cv) {
         CallVolumeDto dto = new CallVolumeDto();
         dto.setCallVolumeId(cv.getCallVolumeId());
